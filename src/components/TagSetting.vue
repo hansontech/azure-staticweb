@@ -97,7 +97,10 @@ export default {
       let form = this.form
       let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/cooltrax_ui?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==&command=set_tag&sensor_index=${form.sensorIndex}&device_id=${form.deviceId}&tag_name=${form.tagName}&tag_address=${form.tagAddress}`
       fetch(apiUrl)
-      .then(response => alert(response)) //response.json())
+      .then(response => {
+        console.log('test:', response)
+        alert(JSON.stringify(response))
+      }) //response.json())
       .then(data => console.log(data));
     },
     onReset(event) {
