@@ -3,7 +3,7 @@ import Vuex from 'vuex'
 import VuexPersist from 'vuex-persist'
 
 // Modules
-import auth from './auth.js'
+// import auth from './auth.js'
 
 Vue.use(Vuex)
 const vuexLocalStorage = new VuexPersist({
@@ -13,9 +13,9 @@ const vuexLocalStorage = new VuexPersist({
 export const store = new Vuex.Store({
   plugins: [vuexLocalStorage.plugin],
 
-  modules: {
-    auth
-  }
+  // modules: {
+   // auth
+  // }
 })
 
 // export default store
