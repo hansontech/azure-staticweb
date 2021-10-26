@@ -88,6 +88,7 @@
 <script>
 export default {
   name: 'home',
+  props: ['deviceId'],
   data: function () {
     return {
       form: {
@@ -145,6 +146,9 @@ export default {
   },
   created () {
     console.log('created')
+    if (this.deviceId !== undefined) {
+      this.form.deviceId = this.deviceId
+    }
   }
 }
 </script>

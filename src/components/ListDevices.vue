@@ -2,7 +2,7 @@
 <div>
   <App/>
   <b-container fluid style="padding-right: 30px; padding-left: 30px; margin-top:65px; margin-left:0px; margin-right:0px"> 
-    <b-row align-v="center">
+    <b-row class="mt-5" align-v="center">
       <b-col align="start" sm="4">
           <h4>CalAmp Devices <small>({{(devices !== null) ? devices.length : 0}})</small></h4>
         </b-col>         
@@ -10,7 +10,9 @@
           <b-button variant="info" @click="refresh()">Refresh</b-button>
         </b-col>
     </b-row>
-    <b-row class="mt-2">
+    <b-row class="mt-2" style="border-bottom: 1px solid green;">
+    </b-row>
+    <b-row class="mt-2" >
       <b-col class="at-scroll">
         <b-card-group deck>
           <b-modal id="modalDeleteConfirm"
@@ -35,7 +37,7 @@
               <b-col lg="3" align="end">
                 <b-dropdown variant="secondary">
                   <b-dropdown-item @click.stop="resetTags(device)">Reset tags</b-dropdown-item>
-                  <b-dropdown-item href="set_tag">Set tags</b-dropdown-item>
+                  <b-dropdown-item :href="'set_tag/' + device.deviceId">Set tags</b-dropdown-item>
                 </b-dropdown>
               </b-col>
             </b-row>

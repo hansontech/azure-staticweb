@@ -19,7 +19,7 @@ const router = new VueRouter({
       name: 'main',
       component: Home,
       meta: {
-        title: 'AIoT: Main',
+        title: 'Main',
         auth: false
       }
     },
@@ -42,9 +42,10 @@ const router = new VueRouter({
       }
     },
     {
-      path: '/set_tag',
+      path: '/set_tag/:deviceId?',
       name: 'set_tag',
       component: TagSetting,
+      props: true,
       meta: {
         title: 'Set Tag',
         auth: false

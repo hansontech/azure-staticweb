@@ -2,13 +2,12 @@
 <div>
   <App/>
   <b-container fluid style="padding-right: 0px; padding-left: 0px; margin-top:65px; margin-left:0px; margin-right:0px"> 
-    <div style="height: 250px;">
-      <b-row style="height:100%">
-        <b-col>
-          test
+      <b-row class="mt-4">
+        <b-col align="center">
+          <h2>Demo App for CalAmp Integration</h2>
+          <h3>Select Above Items to Run</h3>
         </b-col>
       </b-row>
-    </div>
   </b-container>
 </div>
 </template>
