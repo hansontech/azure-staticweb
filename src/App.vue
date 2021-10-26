@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <b-navbar toggleable="sm" type="light" variant="info" fixed="top"> <!--  class="fixed-top"> -->
+    <b-navbar toggleable="sm" type="dark" variant="dark" fixed="top"> <!--  class="fixed-top"> -->
       <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
       <b-navbar-brand to="/">
         <img src="./assets/cooltrax-logo.jpeg" height="40" alt="Cooltrax">

@@ -2,15 +2,31 @@
 <div>
   <App/>
   <b-container fluid style="padding-right: 30px; padding-left: 30px; margin-top:65px; margin-left:0px; margin-right:0px"> 
-  <b-modal v-if="response !== null" id="modal-response" title="Response" size="xl" ok-only>
+  <b-modal id="modal-response" title="Response" size="xl" ok-only>
+    <div v-if="response !== null">
     <p>CalAmp API Calls</p>
+    <b-row><b-col>
     {{response['whitelist_request']}}
+    </b-col> </b-row>
+    <b-row><b-col>
     {{response['assign_sensor_requests'][0]}}
+    </b-col> </b-row>
+    <b-row><b-col>
     {{response['assign_sensor_requests'][1]}}
+    </b-col> </b-row>
+    <b-row><b-col>
     <p class="mt-2">CalAmp API Responses</p>
+    </b-col> </b-row>
+    <b-row><b-col>
     {{response['whitelist_response']}}
+    </b-col> </b-row>
+    <b-row><b-col>
     {{response['assign_sensor_responses'][0]}}
+    </b-col> </b-row>
+    <b-row><b-col>
     {{response['assign_sensor_responses'][1]}}
+    </b-col> </b-row>
+    </div>
   </b-modal>
   <b-form @submit="onSubmit" @reset="onReset" v-if="show">
     <b-form-group
@@ -127,7 +143,9 @@ export default {
         // alert(JSON.stringify(data))
         this.response = data
         console.log(this.response)
+        this.$forceUpdate()
         this.$bvModal.show('modal-response')
+        this.$forceUpdate()
       });
     },
     onReset(event) {
