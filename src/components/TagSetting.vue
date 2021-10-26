@@ -2,6 +2,16 @@
 <div>
   <App/>
   <b-container fluid style="padding-right: 30px; padding-left: 30px; margin-top:65px; margin-left:0px; margin-right:0px"> 
+  <b-modal v-if="response !== null" id="modal-response" title="Response" size="xl" ok-only>
+    <p>CalAmp API Calls</p>
+    {{response['whitelist_request']}}
+    {{response['assign_sensor_requests'][0]}}
+    {{response['assign_sensor_requests'][1]}}
+    <p class="mt-2">CalAmp API Responses</p>
+    {{response['whitelist_response']}}
+    {{response['assign_sensor_responses'][0]}}
+    {{response['assign_sensor_responses'][1]}}
+  </b-modal>
   <b-form @submit="onSubmit" @reset="onReset" v-if="show">
     <b-form-group
         id="input-group-1"
@@ -27,6 +37,7 @@
         id="input-2"
         v-model="form.sensorIndex"
         type="number"
+        min="0" max="1"
         required
         placeholder="Enter 0 or 1"
       ></b-form-input>
@@ -57,7 +68,7 @@
         v-model="form.tagAddress"
         type="text"
         required
-        placeholder="Enter Bluetooth Address e.g. 0x112233445566"
+        placeholder="Enter Bluetooth Address e.g. 0x112233445566 or 11:22:33:44:55:66"
         class="mt-3"
       ></b-form-input>
     </b-form-group>
@@ -85,8 +96,11 @@ export default {
         tagName: '',
         tagAddress: ''
       },
+      response: null,
       show: true
     }
+  },
+  watch: {
   },
   computed: {
   },
@@ -95,13 +109,25 @@ export default {
       event.preventDefault()
       // alert(JSON.stringify(this.form))
       let form = this.form
+      if (form.tagAddress.indexOf(':') > -1) {
+        form.tagAddress = '0x' + form.tagAddress.replace(/:/g, '')
+      }
       let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/cooltrax_ui?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==&command=set_tag&sensor_index=${form.sensorIndex}&device_id=${form.deviceId}&tag_name=${form.tagName}&tag_address=${form.tagAddress}`
-      fetch(apiUrl)
-      .then(response => {
-        console.log('test:', response)
-        alert(JSON.stringify(response))
-      }) //response.json())
-      .then(data => console.log(data));
+      fetch(apiUrl,  {
+        method: "GET",
+        headers: {"Content-type": "application/json;charset=UTF-8"}
+      })
+      .then(response => response.json())
+      // {
+        // console.log('test:', response)
+        // alert(JSON.stringify(response))
+      // }) //response.json())
+      .then(data => {
+        // alert(JSON.stringify(data))
+        this.response = data
+        console.log(this.response)
+        this.$bvModal.show('modal-response')
+      });
     },
     onReset(event) {
       event.preventDefault()

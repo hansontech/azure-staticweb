@@ -4,6 +4,7 @@ import VueRouter from 'vue-router'
 import Home from '@/components/Home'
 import Login from '@/components/Login'
 import TagSetting from '@/components/TagSetting'
+import ListDevices from '@/components/ListDevices'
 
 // vue-router reference
 // https://router.vuejs.org/guide/essentials/named-routes.html
@@ -28,6 +29,15 @@ const router = new VueRouter({
       component: Login,
       meta: {
         title: 'Login',
+        auth: false
+      }
+    },
+    {
+      path: '/list_devices',
+      name: 'list_devices',
+      component: ListDevices,
+      meta: {
+        title: 'List Devices',
         auth: false
       }
     },
