@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <b-navbar toggleable="sm" type="dark" variant="dark" fixed="top"> <!--  class="fixed-top"> -->
+    <b-navbar toggleable="sm" type="light" variant="info" fixed="top"> <!--  class="fixed-top"> -->
       <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
       <b-navbar-brand to="/">
         <img src="./assets/cooltrax-logo.jpeg" height="40" alt="Cooltrax">
@@ -8,7 +8,7 @@
       <b-collapse is-nav id="nav_collapse">
         <b-navbar-nav>
           <b-nav-item href="/list_devices">List Devices</b-nav-item>
-          <b-nav-item href="/set_tag" >Set Tag</b-nav-item>
+          <b-nav-item href="/set_tag" >Set Tags</b-nav-item>
           <!-- <b-nav-item href="#" disabled>Disabled</b-nav-item> -->
         </b-navbar-nav>
         <!-- Right aligned nav items -->
@@ -25,7 +25,7 @@
             <b-dropdown-item href="#">FA</b-dropdown-item>
           </b-nav-item-dropdown>
           -->
-          <b-nav-item-dropdown right>
+          <b-nav-item-dropdown right disabled>
             <!-- Using 'button-content' slot -->
             <template #button-content>
               <em>User</em>
