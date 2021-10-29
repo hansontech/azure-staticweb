@@ -68,8 +68,9 @@ router.beforeEach((to, from, next) => {
         next() // continue go to 'to' page
       } else {
         // TODO hostUrl https
-        const hostUrl = window.location.protocol + '//' + window.location.host
-        router.push('/.auth/login/aad?post_login_redirect_uri=' + hostUrl + to.path) // login to Active Directory
+        // const hostUrl = window.location.protocol + '//' + window.location.host
+        // router.push('/.auth/login/aad?post_login_redirect_uri=' + hostUrl + to.path) // login to Active Directory
+        next()
       }
     } else { // if the 'to' page does not need the authentication
       next()
