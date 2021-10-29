@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div>
     <b-navbar toggleable="sm" type="dark" variant="dark" fixed="top"> <!--  class="fixed-top"> -->
       <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
       <b-navbar-brand to="/">
@@ -9,7 +9,6 @@
         <b-navbar-nav>
           <b-nav-item href="/list_devices">List Devices</b-nav-item>
           <b-nav-item href="/set_tag" >Set Tags</b-nav-item>
-          <!-- <b-nav-item href="#" disabled>Disabled</b-nav-item> -->
         </b-navbar-nav>
         <!-- Right aligned nav items -->
         <b-navbar-nav class="ml-auto">
@@ -25,31 +24,57 @@
             <b-dropdown-item href="#">FA</b-dropdown-item>
           </b-nav-item-dropdown>
           -->
-          <b-nav-item-dropdown right disabled>
+          <b-nav-item-dropdown right>
             <!-- Using 'button-content' slot -->
             <template #button-content>
               <em>User</em>
             </template>
-            <b-dropdown-item href="#">Profile</b-dropdown-item>
-            <b-dropdown-item href="#">Sign Out</b-dropdown-item>
+            <b-dropdown-item @click="getUserInfo">Profile</b-dropdown-item>
+            <b-dropdown-item @click="signIn">Sign In</b-dropdown-item>
+            <b-dropdown-item @click="signOut">Sign Out</b-dropdown-item>
           </b-nav-item-dropdown>
         </b-navbar-nav>
       </b-collapse>
     </b-navbar>
+    <b-modal id="modal-userInfo" title="User Info" ok-only>
+      <div>
+        <p>CalAmp API Calls</p>
+        <b-row><b-col>  
+          {{userInfo}}    
+        </b-col> </b-row>
+      </div>
+    </b-modal>
   </div>
 </template>
 
 <script>
+
+import caHelper from './caHelper'
+
 export default {
   name: "app",
   data() {
     return {
-      value: "World"
-    };
+      value: "World",
+      userInfo: ''
+    }
   },
-  computed: {
+  created () {
+    console.log('app created')
   },
-  method: {
+  methods: {
+    async getUserInfo () {
+      this.userInfo = await caHelper.getUserInfo()
+      this.$bvModal.show('modal-userInfo')
+    },
+    async signIn () {
+      await caHelper.userSignIn()
+    },
+    async signOut () {
+      this.userInfo = await caHelper.userSignOut()
+    }
   }
 };
+
+
 </script>

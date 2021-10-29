@@ -1,14 +1,5 @@
 <template>
-  <div>
-    <div>
-      <p>Test header</p>
-    </div>
   <router-view></router-view>
-  <!-- <div>
-      <p>Test header</p>
-    </div>
-    -->
-  </div>
 </template>
 
 <script>

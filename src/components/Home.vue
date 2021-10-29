@@ -19,15 +19,18 @@ export default {
     return {
     }
   },
-  computed: {
-  },
   methods: {
+    getUserInfo2() {
+      console.log('local user info')
+    }
   },
   created () {
     console.log('created')
   }
 }
+
 </script>
+
 <style>
 
 .at-home{

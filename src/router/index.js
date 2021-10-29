@@ -1,11 +1,10 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-// import store from '../store'
 import Home from '@/components/Home'
 import Login from '@/components/Login'
 import TagSetting from '@/components/TagSetting'
 import ListDevices from '@/components/ListDevices'
-
+import store from '../store'
 // vue-router reference
 // https://router.vuejs.org/guide/essentials/named-routes.html
 
@@ -38,7 +37,7 @@ const router = new VueRouter({
       component: ListDevices,
       meta: {
         title: 'List Devices',
-        auth: false
+        auth: true
       }
     },
     {
@@ -48,35 +47,33 @@ const router = new VueRouter({
       props: true,
       meta: {
         title: 'Set Tag',
-        auth: false
+        auth: true
       }
     }
     //   AuthRouter
   ]
 })
 
-// router.beforeEach(AuthFilter)
 router.beforeEach((to, from, next) => {
   // Use the page's router title to name the page
   if (to.meta && to.meta.title) {
     document.title = to.meta.title
   }
-  // console.log('router: ', store.getters.isAuthenticated)
 
   // Redirect to the home page if not authenticated
   // for pages that have 'auth: true' set
   if (to.meta && to.meta.auth !== undefined) {
-    /*
     if (to.meta.auth) { // if 'to' page needs authentication
       if (store.getters.isAuthenticated) { // and user has been authenticated
         next() // continue go to 'to' page
       } else {
-        router.push({ name: 'signup' })
+        // TODO hostUrl https
+        const hostUrl = window.location.protocol + '//' + window.location.host
+        router.push('/.auth/login/aad?post_login_redirect_uri=' + hostUrl + to.path) // login to Active Directory
       }
     } else { // if the 'to' page does not need the authentication
       next()
     }
-    */
     next()
   } else { // if 'to' page does not care about authorization
     next()
