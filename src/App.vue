@@ -68,7 +68,8 @@ export default {
   computed: {
     isAuthenticated: function () {
       return this.$store.getters.isAuthenticated
-    },
+    }
+  },
   methods: {
     async getUserInfo () {
       this.userInfo = await caHelper.getUserInfo()
