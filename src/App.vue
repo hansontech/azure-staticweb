@@ -30,15 +30,15 @@
               <em>User</em>
             </template>
             <b-dropdown-item @click="getUserInfo">Profile</b-dropdown-item>
-            <b-dropdown-item @click="signIn">Sign In</b-dropdown-item>
+            <b-dropdown-item href="/.auth/login/aad">Sign In</b-dropdown-item>
             <b-dropdown-item @click="signOut">Sign Out</b-dropdown-item>
           </b-nav-item-dropdown>
         </b-navbar-nav>
       </b-collapse>
     </b-navbar>
-    <b-modal id="modal-userInfo" title="User Info 2" ok-only>
+    <b-modal id="modal-userInfo" title="User Info" ok-only>
       <div>
-        <p>User Info</p>
+        <p>User Info 2</p>
         <b-row><b-col>  
           {{userInfo}}    
         </b-col> </b-row>
