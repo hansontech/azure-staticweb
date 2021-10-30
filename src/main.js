@@ -1,5 +1,4 @@
 import Vue from 'vue'
-import Vuex from 'vuex'
 import App from './App.vue'
 import Root from './Root'
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
@@ -16,7 +15,7 @@ console.log('host url: ', hostUrl)
 
 // Make BootstrapVue available throughout your project
 Vue.use(BootstrapVue)
-Vue.use(Vuex)
+// Vue.use(Vuex)
 // Optionally install the BootstrapVue icon components plugin
 Vue.use(IconsPlugin)
 Vue.config.productionTip = false
@@ -25,13 +24,15 @@ Vue.config.devtools = false
 Vue.component('App', App)
 
 new Vue({
-  el: '#app', // mount to the element with the id is app #app
-  template: '<Root/>',
+  // el: '#app', // mount to the element with the id is app #app
+  // template: '<Root/>',
   // render: h => h(App),
   router,
   store,
+  /*
   components: {
     Root
-  } 
-  // ...Root
-}) // .$mount('#app')
+  }
+  */
+  ...Root
+}).$mount('#app')
