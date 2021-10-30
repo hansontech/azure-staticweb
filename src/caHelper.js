@@ -13,14 +13,17 @@ export default {
   },
   async userSignIn() {
    try {
-     await fetch('/.auth/login/aad')
+     // await fetch('/.auth/login/aad')
+     this.$router.push('/.auth/login/aad')
+     console.log('logged in')
    } catch (e) {
      console.log(e)
    }
   },
   async userSignOut() {
    try {
-    await fetch('/.auth/logout')
+    // await fetch('/.auth/logout')
+    this.$router.push('/.auth/logout')
    } catch (e) {
     console.log(e)
    }

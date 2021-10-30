@@ -38,7 +38,7 @@
     </b-navbar>
     <b-modal id="modal-userInfo" title="User Info" ok-only>
       <div>
-        <p>CalAmp API Calls</p>
+        <p>User Info</p>
         <b-row><b-col>  
           {{userInfo}}    
         </b-col> </b-row>
@@ -68,10 +68,12 @@ export default {
       this.$bvModal.show('modal-userInfo')
     },
     async signIn () {
-      await caHelper.userSignIn()
+      // await caHelper.userSignIn()
+      this.$router.push('/.auth/login/aad')
     },
     async signOut () {
-      this.userInfo = await caHelper.userSignOut()
+      // this.userInfo = await caHelper.userSignOut()
+      this.$router.push('/.auth/logout')
     }
   }
 };
