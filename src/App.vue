@@ -30,7 +30,7 @@
               <em>User</em>
             </template>
             <b-dropdown-item @click="getUserInfo">Profile</b-dropdown-item>
-            <b-dropdown-item href="/.auth/login/aad">Sign In</b-dropdown-item>
+            <b-dropdown-item href="/.auth/login/aad?post_login_redirect_uri=/home">Sign In</b-dropdown-item>
             <b-dropdown-item @click="signOut">Sign Out</b-dropdown-item>
           </b-nav-item-dropdown>
         </b-navbar-nav>
