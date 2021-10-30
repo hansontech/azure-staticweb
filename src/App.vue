@@ -40,7 +40,10 @@
       <div>
         <p>User Info</p>
         <b-row><b-col>  
-          {{userInfo}}    
+          {{userInfo}}
+        </b-col> </b-row>
+        <b-row><b-col>  
+          {{isAuthenticated}} 
         </b-col> </b-row>
       </div>
     </b-modal>
@@ -62,6 +65,10 @@ export default {
   created () {
     console.log('app created')
   },
+  computed: {
+    isAuthenticated: function () {
+      return this.$store.getters.isAuthenticated
+    },
   methods: {
     async getUserInfo () {
       this.userInfo = await caHelper.getUserInfo()
