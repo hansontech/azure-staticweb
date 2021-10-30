@@ -8,7 +8,7 @@ export default {
      const { clientPrincipal } = payload;
      return clientPrincipal;
     } catch (e) {
-     return 'not available'
+     return { error: 'data not available' }
     }
   },
   async userSignIn() {

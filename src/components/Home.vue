@@ -6,7 +6,6 @@
         <b-col align="center">
           <h2>Demo App for CalAmp Integration</h2>
           <h3>Select Above Items to Run</h3>
-          <a href="/.auth/login/aad?post_login_redirect_uri=/home">Login 2</a>
 
         </b-col>
       </b-row>

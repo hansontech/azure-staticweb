@@ -30,15 +30,15 @@
               <em>User</em>
             </template>
             <b-dropdown-item @click="getUserInfo">Profile</b-dropdown-item>
-            <b-dropdown-item href="/.auth/login/aad?post_login_redirect_uri=/home">Sign In</b-dropdown-item>
-            <b-dropdown-item @click="signOut">Sign Out</b-dropdown-item>
+            <b-dropdown-item href="/.auth/login/aad?post_login_redirect_uri=/loggedin">Sign In</b-dropdown-item>
+            <b-dropdown-item href="/.auth/logout?post_logout_redirect_uri=/loggedout">Sign Out</b-dropdown-item>
           </b-nav-item-dropdown>
         </b-navbar-nav>
       </b-collapse>
     </b-navbar>
     <b-modal id="modal-userInfo" title="User Info" ok-only>
       <div>
-        <p>User Info 2</p>
+        <p>User Info</p>
         <b-row><b-col>  
           {{userInfo}}    
         </b-col> </b-row>
@@ -66,14 +66,6 @@ export default {
     async getUserInfo () {
       this.userInfo = await caHelper.getUserInfo()
       this.$bvModal.show('modal-userInfo')
-    },
-    async signIn () {
-      // await caHelper.userSignIn()
-      this.$router.push('/.auth/login/aad/')
-    },
-    async signOut () {
-      // this.userInfo = await caHelper.userSignOut()
-      this.$router.push('/.auth/logout/')
     }
   }
 };

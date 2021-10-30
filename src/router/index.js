@@ -2,6 +2,8 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '@/components/Home'
 import Login from '@/components/Login'
+import LoginCallback from '@/components/LoginCallback'
+import LogoutCallback from '@/components/LogoutCallback'
 import TagSetting from '@/components/TagSetting'
 import ListDevices from '@/components/ListDevices'
 import store from '../store'
@@ -15,10 +17,10 @@ const router = new VueRouter({
   routes: [
     {
       path: '/',
-      name: 'main',
+      name: 'home',
       component: Home,
       meta: {
-        title: 'Main',
+        title: 'home',
         auth: false
       }
     },
@@ -28,6 +30,24 @@ const router = new VueRouter({
       component: Login,
       meta: {
         title: 'Login',
+        auth: false
+      }
+    },
+    {
+      path: '/loggedin',
+      name: 'loggedin',
+      component: LoginCallback,
+      meta: {
+        title: 'Logged in',
+        auth: false
+      }
+    },
+    {
+      path: '/loggedout',
+      name: 'loggedout',
+      component: LogoutCallback,
+      meta: {
+        title: 'Logged Out',
         auth: false
       }
     },
@@ -69,8 +89,8 @@ router.beforeEach((to, from, next) => {
       } else {
         // TODO hostUrl https
         // const hostUrl = window.location.protocol + '//' + window.location.host
-        // router.push('/.auth/login/aad?post_login_redirect_uri=' + hostUrl + to.path) // login to Active Directory
-        next()
+        router.replace('/.auth/login/aad?post_login_redirect_uri=' + to.path) // login to Active Directory
+        // next()
       }
     } else { // if the 'to' page does not need the authentication
       next()
