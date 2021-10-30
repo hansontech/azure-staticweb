@@ -36,7 +36,7 @@
         </b-navbar-nav>
       </b-collapse>
     </b-navbar>
-    <b-modal id="modal-userInfo" title="User Info" ok-only>
+    <b-modal id="modal-userInfo" title="User Info 2" ok-only>
       <div>
         <p>User Info</p>
         <b-row><b-col>  
@@ -69,11 +69,11 @@ export default {
     },
     async signIn () {
       // await caHelper.userSignIn()
-      this.$router.push('/.auth/login/aad')
+      this.$router.push('/.auth/login/aad/')
     },
     async signOut () {
       // this.userInfo = await caHelper.userSignOut()
-      this.$router.push('/.auth/logout')
+      this.$router.push('/.auth/logout/')
     }
   }
 };
