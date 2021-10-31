@@ -33,7 +33,7 @@ export default {
           this.$store.commit('setAuthenticated', true)
           this.$router.replace({name: 'list_devices'})
         } else {
-          let routerObj = this.$router
+          // let routerObj = this.$router
           this.isLoginFailed = true
           setTimeout(function () {
             // routerObj.replace('/.auth/logout?post_logout_redirect_uri=/loggedout')
