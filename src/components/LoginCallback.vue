@@ -4,6 +4,9 @@
       <b-row align-v="center" align-h="center" > 
         <spinner size="large" />
       </b-row>
+      <b-row v-if="isLoginFailed" align-v="center" align-h="center" > 
+        <h3>Sign-in did not succeed. Logging out..</h3> 
+      </b-row>
     </div>
   </b-container>
 </template>
@@ -15,6 +18,7 @@ export default {
   name: 'authcallback',
   data () {
     return {
+      isLoginFailed: false
     }
   },
   created () {
@@ -23,14 +27,21 @@ export default {
   },
   async mounted () {
     let userProfile = await caHelper.getUserInfo()
-    if ('userDetails' in userProfile && 
-          userProfile['userDetails'].includes('cooltrax.com')) {
-      this.$store.commit('setProfile', userProfile)
-      this.$store.commit('setAuthenticated', true)
+    if ('userDetails' in userProfile) { 
+        if (userProfile['userDetails'].includes('cooltrax.com')) {
+          this.$store.commit('setProfile', userProfile)
+          this.$store.commit('setAuthenticated', true)
+          this.$router.replace({name: 'list_devices'})
+        } else {
+          let routerObj = this.$router
+          this.isLoginFailed = true
+          setTimeout(function () {
+            routerObj.replace('/.auth/logout?post_logout_redirect_uri=/loggedout')
+          }, 5000)
+        }
     } else {
       this.$store.commit('setAuthenticated', false)
     }
-    this.$router.replace({name: 'list_devices'})
   },
   methods: {
   }

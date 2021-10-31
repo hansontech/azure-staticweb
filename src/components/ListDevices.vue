@@ -1,7 +1,7 @@
 <template>
 <div>
   <App/>
-  <b-container fluid style="padding-right: 30px; padding-left: 30px; margin-top:65px; margin-left:0px; margin-right:0px"> 
+  <b-container fluid style="padding-right: 30px; padding-left: 30px; margin-top:75px; margin-left:0px; margin-right:0px"> 
     <b-row class="mt-5" align-v="center">
       <b-col align="start" sm="4">
           <h4>CalAmp Devices <small>({{(devices !== null) ? devices.length : 0}})</small></h4>
@@ -11,6 +11,9 @@
         </b-col>
     </b-row>
     <b-row class="mt-2" style="border-bottom: 1px solid green;">
+    </b-row>
+    <b-row class = "mt-2" v-if="isLoading" align-v="center" align-h="center" > 
+        <b-spinner/>
     </b-row>
     <b-row class="mt-2" >
       <b-col class="at-scroll">
@@ -78,7 +81,8 @@ export default {
   name: 'list_devices',
   data: function () {
     return {
-      devices: null
+      devices: null,
+      isLoading: false
     }
   },
   watch: {
@@ -93,6 +97,7 @@ export default {
       this.loadDevices()
     },
     loadDevices() {
+      this.isLoading = true
       let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/cooltrax_ui?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==&command=list_devices`
       fetch(apiUrl,  {
         method: "GET",
@@ -105,6 +110,7 @@ export default {
       // }) //response.json())
       .then(data => {
         this.devices = data.devices
+        this.isLoading = false
       });
     }
   },

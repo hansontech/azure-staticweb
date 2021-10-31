@@ -81,8 +81,9 @@ router.beforeEach((to, from, next) => {
   }
 
   // Redirect to the home page if not authenticated
-  // for pages that have 'auth: true' set
-  if (to.meta && to.meta.auth !== undefined) {
+  // for pages that have 'auth: true' set, and not in debug
+  console.log('protocol: ', window.location.protocol)
+  if (window.location.protocol !== 'http:' && to.meta && to.meta.auth !== undefined) {
     if (to.meta.auth) { // if 'to' page needs authentication
       if (store.getters.isAuthenticated) { // and user has been authenticated
         next() // continue go to 'to' page

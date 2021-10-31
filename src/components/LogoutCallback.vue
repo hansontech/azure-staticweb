@@ -2,7 +2,7 @@
   <b-container fluid >
     <div style="min-height: 500px">
       <b-row align-v="center" align-h="center" > 
-        <spinner size="large" />
+        <b-spinner/>
       </b-row>
     </div>
   </b-container>
@@ -20,15 +20,8 @@ export default {
   created () {
   },
   async mounted () {
-    let userProfile = await caHelper.getUserInfo()
-    if ('userDetails' in userProfile && 
-          userProfile['userDetails'].includes('cooltrax.com')) {
-      this.$store.commit('setProfile', userProfile)
-      this.$store.commit('setAuthenticated', true)
-    } else {
-      this.$store.commit('setAuthenticated', false)
-    }
-    this.$router.replace({name: 'home'})
+    this.$store.commit('setAuthenticated', false)
+    this.$router.replace('/')
   },
   methods: {
   }
