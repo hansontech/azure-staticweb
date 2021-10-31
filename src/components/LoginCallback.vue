@@ -36,7 +36,8 @@ export default {
           let routerObj = this.$router
           this.isLoginFailed = true
           setTimeout(function () {
-            routerObj.replace('/.auth/logout?post_logout_redirect_uri=/loggedout')
+            // routerObj.replace('/.auth/logout?post_logout_redirect_uri=/loggedout')
+            window.location.href = '/.auth/logout?post_logout_redirect_uri=/loggedout'
           }, 5000)
         }
     } else {
