@@ -9,7 +9,7 @@
 </template>
 
 <script>
-import caHelper from '../caHelper'
+// import caHelper from '../caHelper'
 
 export default {
   name: 'authcallback',
