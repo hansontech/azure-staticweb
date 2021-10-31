@@ -1,7 +1,7 @@
 <template>
 <div>
   <App/>
-  <b-container fluid style="padding-right: 30px; padding-left: 30px; margin-top:65px; margin-left:0px; margin-right:0px"> 
+  <b-container fluid style="padding-right: 30px; padding-left: 30px; margin-top:75px; margin-left:0px; margin-right:0px"> 
   <b-modal id="modal-response" title="Response" size="xl" ok-only>
     <div v-if="response !== null">
     <p>CalAmp API Calls</p>

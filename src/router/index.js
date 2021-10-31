@@ -97,7 +97,6 @@ router.beforeEach((to, from, next) => {
     } else { // if the 'to' page does not need the authentication
       next()
     }
-    next()
   } else { // if 'to' page does not care about authorization
     next()
   }
