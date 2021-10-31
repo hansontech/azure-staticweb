@@ -29,9 +29,9 @@
             <template #button-content>
               <em>User</em>
             </template>
-            <b-dropdown-item @click="getUserInfo">Profile</b-dropdown-item>
-            <b-dropdown-item href="/.auth/login/aad?post_login_redirect_uri=/loggedin">Sign In</b-dropdown-item>
-            <b-dropdown-item href="/.auth/logout?post_logout_redirect_uri=/loggedout">Sign Out</b-dropdown-item>
+            <b-dropdown-item v-if="isAuthenticated" @click="getUserInfo">Profile</b-dropdown-item>
+            <b-dropdown-item v-if="isAuthenticated === false" href="/.auth/login/aad?post_login_redirect_uri=/loggedin">Sign In</b-dropdown-item>
+            <b-dropdown-item v-if="isAuthenticated" href="/.auth/logout?post_logout_redirect_uri=/loggedout">Sign Out</b-dropdown-item>
           </b-nav-item-dropdown>
         </b-navbar-nav>
       </b-collapse>
@@ -40,10 +40,7 @@
       <div>
         <p>User Info</p>
         <b-row><b-col>  
-          {{userInfo}}
-        </b-col> </b-row>
-        <b-row><b-col>  
-          {{isAuthenticated}} 
+          {{userEmail}}
         </b-col> </b-row>
       </div>
     </b-modal>
@@ -59,7 +56,7 @@ export default {
   data() {
     return {
       value: "World",
-      userInfo: ''
+      userInfo: {}
     }
   },
   created () {
@@ -68,6 +65,12 @@ export default {
   computed: {
     isAuthenticated: function () {
       return this.$store.getters.isAuthenticated
+    },
+    userEmail: function () {
+      if ('userDetails' in this.userInfo) {
+        return this.userInfo['userDetails']
+      }
+      return ''
     }
   },
   methods: {

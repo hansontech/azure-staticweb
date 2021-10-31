@@ -1,11 +1,11 @@
 <template>
   <b-container fluid >
     <div style="min-height: 500px">
-      <b-row align-v="center" align-h="center" > 
-        <b-spinner/>
+      <b-row class="mt-3" v-if="isLoginFailed" align-v="center" align-h="center" > 
+        <h3>Not a Cooltrax user. Logging out..</h3> 
       </b-row>
-      <b-row v-if="isLoginFailed" align-v="center" align-h="center" > 
-        <h3>Sign-in did not succeed. Logging out..</h3> 
+      <b-row align-v="center" v-if="isLoginFailed" align-h="center" > 
+        <b-spinner/>
       </b-row>
     </div>
   </b-container>
