@@ -2,7 +2,7 @@
   <b-container fluid >
     <div style="min-height: 500px">
       <b-row align-v="center" align-h="center" > 
-        <spinner size="large" />
+        <b-spinner/>
       </b-row>
       <b-row v-if="isLoginFailed" align-v="center" align-h="center" > 
         <h3>Sign-in did not succeed. Logging out..</h3> 
