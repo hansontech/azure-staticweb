@@ -38,7 +38,6 @@
     </b-navbar>
     <b-modal id="modal-userInfo" title="User Info" ok-only>
       <div>
-        <p>User Info</p>
         <b-row><b-col>  
           {{userEmail}}
         </b-col> </b-row>
