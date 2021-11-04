@@ -5,7 +5,15 @@
     <b-row class="mt-5" align-v="center">
       <b-col align="start" sm="4">
           <h4>CalAmp Devices <small>({{(devices !== null) ? devices.length : 0}})</small></h4>
-        </b-col>         
+        </b-col>
+        <b-col sm="4">
+          <b-form-input class="at-border"
+            type="text" 
+            v-model="searchString"
+            required
+            placeholder="Search ...">
+          </b-form-input>
+        </b-col>          
         <b-col align="end">
           <b-button variant="info" @click="refresh()">Refresh</b-button>
         </b-col>
@@ -59,10 +67,11 @@
                   {{tag}}
                 </b-col>
                 <b-col lg="4">
-                  {{device.tags[tag].tagName}}
+                  <tt>{{device.tags[tag].tagName}}</tt>
                 </b-col>
                 <b-col>
-                  {{device.tags[tag].tagAddress}}
+                  <tt>{{device.tags[tag].tagAddress.replace(/^(0x)/,'').toUpperCase().replace(/\B(?=([0-9A-Fa-f]{2})+(?![0-9A-Fa-f]))/g, ":")}}</tt>
+                    <!-- into 11:22:33:44:55:66 format -->
                 </b-col>
                </b-row>
               </b-col>
@@ -82,6 +91,7 @@ export default {
   data: function () {
     return {
       devices: null,
+      searchString: '',
       isLoading: false
     }
   },
@@ -98,7 +108,7 @@ export default {
     },
     loadDevices() {
       this.isLoading = true
-      let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/cooltrax_ui?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==&command=list_devices`
+      let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/cooltrax_ui?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==&command=list_devices&search=${this.searchString}`
       fetch(apiUrl,  {
         method: "GET",
         headers: {"Content-type": "application/json;charset=UTF-8"}
