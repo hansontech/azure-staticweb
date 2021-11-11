@@ -57,22 +57,38 @@
                 Mapped to UMD <b>{{device.umdName}}</b>
               </b-col>
             </b-row>
-            <b-row class="mt-2" v-if="'tags' in device">
+            <b-row class="mt-2" v-if="'sensors' in device && device.sensors.length > 0">
               <b-col>
                <b-row>
-                <b-col>Temperature Sensors</b-col>
+                <b-col>Sensors</b-col>
                </b-row>
-               <b-row class="ml-1" v-for="(tag) in Object.keys(device.tags)" :key="tag">
-                <b-col lg="1">
-                  {{tag}}
+               <b-row class="ml-1">
+                <b-col lg="4">
+                  <b>Name</b>
                 </b-col>
                 <b-col lg="4">
-                  <tt>{{device.tags[tag].tagName}}</tt>
+                  <b>Tag Serial</b>
                 </b-col>
+                <b-col lg="4">
+                  <b>ELA Tag</b>
+                </b-col>
+               </b-row>
+               <b-row class="ml-1" v-for="(tag) in device.sensors" :key="tag">
+                <b-col lg="4">
+                  <tt>{{tag.sensorName}}</tt>
+                </b-col>
+                <b-col lg="4">
+                  <tt>{{('tagSerialNumber' in tag) ? tag.tagSerialNumber : ''}}</tt>
+                </b-col>
+                <b-col lg="4">
+                  <tt>{{('tagDeviceId' in tag) ? tag.tagDeviceId : ''}}</tt>
+                </b-col>
+                <!--
                 <b-col>
-                  <tt>{{device.tags[tag].tagAddress.replace(/^(0x)/,'').toUpperCase().replace(/\B(?=([0-9A-Fa-f]{2})+(?![0-9A-Fa-f]))/g, ":")}}</tt>
-                    <!-- into 11:22:33:44:55:66 format -->
+                  <tt>{{tag.tagAddress.replace(/^(0x)/,'').toUpperCase().replace(/\B(?=([0-9A-Fa-f]{2})+(?![0-9A-Fa-f]))/g, ":")}}</tt>
                 </b-col>
+                --->
+                <!-- into 11:22:33:44:55:66 format -->
                </b-row>
               </b-col>
             </b-row>
@@ -108,7 +124,13 @@ export default {
     },
     loadDevices() {
       this.isLoading = true
-      let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/cooltrax_ui?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==&command=list_devices&search=${this.searchString}`
+      // let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/cooltrax_ui?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==&command=list_devices&search=${this.searchString}`
+
+      let withSearchString = ''
+      if (this.searchString !== null || this.searchString !=='') {
+        withSearchString = '/' + this.searchString
+      }
+      let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/list_devices/calamp${withSearchString}?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==`
       fetch(apiUrl,  {
         method: "GET",
         headers: {"Content-type": "application/json;charset=UTF-8"}
@@ -118,8 +140,12 @@ export default {
         // console.log('test:', response)
         // alert(JSON.stringify(response))
       // }) //response.json())
-      .then(data => {
-        this.devices = data.devices
+      .then(jsonData => {
+        console.log(jsonData)
+        this.devices = jsonData
+        this.isLoading = false
+      }).catch((error) => {
+        console.log(error)
         this.isLoading = false
       });
     }

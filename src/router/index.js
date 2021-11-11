@@ -6,6 +6,7 @@ import LoginCallback from '@/components/LoginCallback'
 import LogoutCallback from '@/components/LogoutCallback'
 import TagSetting from '@/components/TagSetting'
 import ListDevices from '@/components/ListDevices'
+import ListTags from '@/components/ListTags'
 import store from '../store'
 // vue-router reference
 // https://router.vuejs.org/guide/essentials/named-routes.html
@@ -57,6 +58,15 @@ const router = new VueRouter({
       component: ListDevices,
       meta: {
         title: 'List Devices',
+        auth: true
+      }
+    },
+    {
+      path: '/list_tags',
+      name: 'list_tags',
+      component: ListTags,
+      meta: {
+        title: 'List Tags',
         auth: true
       }
     },

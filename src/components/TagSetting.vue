@@ -3,7 +3,12 @@
   <App/>
   <b-container fluid style="padding-right: 30px; padding-left: 30px; margin-top:75px; margin-left:0px; margin-right:0px"> 
   <b-modal id="modal-response" title="Response" size="xl" ok-only>
-    <div v-if="response !== null">
+    <div v-if="response !== null && 'error' in response">
+      <b-row><b-col>
+        <b>Error: </b> {{response['error']}}
+      </b-col> </b-row>
+    </div>
+    <div v-if="response !== null && ('error' in response) === false">
     <p>CalAmp API Calls</p>
     <b-row><b-col>
     {{response['whitelist_request']}}
@@ -31,7 +36,7 @@
   <b-form @submit="onSubmit" @reset="onReset" v-if="show">
     <b-form-group
         id="input-group-1"
-        label="CalAmp Device Id"
+        label="CalAmp device Id"
         label-for="input-1"
         description=""
     >
@@ -45,10 +50,12 @@
     </b-form-group>
     <b-form-group
         id="input-group-2"
-        label="Temperature Sensor Number"
+        label="Sensor to connect"
         label-for="input-2"
         description=""
     >
+      <b-form-select v-model="form.sensorName" :options="sensorOptions"></b-form-select>
+      <!--
       <b-form-input
         id="input-2"
         v-model="form.sensorIndex"
@@ -57,10 +64,11 @@
         required
         placeholder="Enter 0 or 1"
       ></b-form-input>
+      -->
     </b-form-group>
     <b-form-group
         id="input-group-3"
-        label="ELA Tag Name"
+        label="ELA tag to use"
         label-for="input-3"
         description=""
     >
@@ -73,7 +81,8 @@
         class="mt-3"
       ></b-form-input>
     </b-form-group>
-        <b-form-group
+    <!--
+    <b-form-group
         id="input-group-4"
         label="ELA Tag Bluetooth Address:"
         label-for="input-4"
@@ -88,8 +97,9 @@
         class="mt-3"
       ></b-form-input>
     </b-form-group>
-    <b-button type="submit" variant="primary">Submit</b-button>
-    <b-button type="reset" variant="danger" class="ml-2">Reset</b-button>
+    -->
+    <b-button type="submit" variant="info">Submit</b-button>
+    <b-button type="reset" variant="info" class="ml-2">Reset</b-button>
     <!--
     <div class="mt-2">
       <b-button variant="primary" @click="login()">Login</b-button>
@@ -107,9 +117,14 @@ export default {
   props: ['deviceId'],
   data: function () {
     return {
+      sensorOptions: [
+          { value: 'door', text: 'Door Sensor' },
+          { value: 'temperature1', text: 'Temperature Sensor 1' },
+          { value: 'temperature2', text: 'Temperature Sensor 2' },
+      ],
       form: {
         deviceId: '',
-        sensorIndex: 0,
+        sensorName: 'temperature1',
         tagName: '',
         tagAddress: ''
       },
@@ -129,7 +144,10 @@ export default {
       if (form.tagAddress.indexOf(':') > -1) {
         form.tagAddress = '0x' + form.tagAddress.replace(/:/g, '')
       }
-      let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/cooltrax_ui?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==&command=set_tag&sensor_index=${form.sensorIndex}&device_id=${form.deviceId}&tag_name=${form.tagName}&tag_address=${form.tagAddress}&run=true`
+      // let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/cooltrax_ui?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==&command=set_tag&sensor_index=${form.sensorIndex}&device_id=${form.deviceId}&tag_name=${form.tagName}&tag_address=${form.tagAddress}&run=true`
+      let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/set_tag/calamp/${form.deviceId}/${form.sensorName}/${form.tagName}?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==&run=false`
+      console.log('url: ', apiUrl)
+
       fetch(apiUrl,  {
         method: "GET",
         headers: {"Content-type": "application/json;charset=UTF-8"}
@@ -141,12 +159,16 @@ export default {
       // }) //response.json())
       .then(data => {
         // alert(JSON.stringify(data))
+        console.log('data: ', data)
         this.response = data
         console.log(this.response)
         this.$forceUpdate()
         this.$bvModal.show('modal-response')
         this.$forceUpdate()
-      });
+      }).catch((error) => {
+        console.log('Error is:', error)
+        console.log('url:', apiUrl)
+      })
     },
     onReset(event) {
       event.preventDefault()
