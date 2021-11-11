@@ -11,7 +11,7 @@
             type="text" 
             v-model="searchString"
             required
-            placeholder="Search ...">
+            placeholder="Search ..">
           </b-form-input>
         </b-col>       
         <b-col align="end">
