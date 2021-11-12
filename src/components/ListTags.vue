@@ -16,9 +16,20 @@
         </b-col>       
         <b-col align="end">
           <b-button variant="info" @click="refresh()">Refresh</b-button>
-          <b-button class="ml-1" variant="info" v-b-toggle.collapseUploadTags>Upload</b-button>
+          <b-button id="buttonUpload" class="ml-1" variant="info" v-b-toggle.collapseUploadTags>Upload</b-button>
         </b-col>
     </b-row>
+    <b-tooltip target="buttonUpload" custom-class="custom-tooltip">
+      <p style="text-align:left">
+        Upload CSV File with format of:<br/>
+        {ELA Tag Name},{Bluetooth Address}<br/>
+        For example, <br/>
+        <tt>
+        PTX51234,0x123456780011 <br/>
+        PTX51235,0x123456880022
+        </tt>
+        </p>
+    </b-tooltip>
     <b-row class="mt-2" style="border-bottom: 1px solid green;">
     </b-row>
     <b-row class = "mt-2" v-if="isLoading" align-v="center" align-h="center" > 
@@ -185,6 +196,10 @@ export default {
 </script>
 <style>
 
+.tooltip .tooltip-inner{
+  max-width: 100%
+}
+
 .at-home{
   margin-top: 50px;
 }
@@ -220,7 +235,5 @@ export default {
 </style>
 
 <style scoped>
-.popover{
-    max-width: 100%; /* Max Width of the popover (depending on the container!) */
-}
+
 </style>
