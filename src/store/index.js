@@ -5,6 +5,7 @@ import persist from 'vuex-localstorage'
 
 // Modules
 import auth from './auth.js'
+import devices from './devices.js'
 
 Vue.use(Vuex)
 /*
@@ -21,7 +22,8 @@ export const store = new Vuex.Store({
     expires: 7 * 24 * 60 * 60 * 1e3 // 1 week
   })],
   modules: {
-   auth
+   auth,
+   devices
   }
 })
 

@@ -122,21 +122,54 @@ export default {
           { value: 'temperature1', text: 'Temperature Sensor 1' },
           { value: 'temperature2', text: 'Temperature Sensor 2' },
       ],
+      oldForm: null,
       form: {
         deviceId: '',
         sensorName: 'temperature1',
         tagName: '',
         tagAddress: ''
       },
+      device: null,
       response: null,
       show: true
     }
   },
   watch: {
+    form: {
+      handler: function (newForm) {
+        this.updateFormByDevice(newForm, this.oldForm)
+        this.oldForm = Object.assign({}, this.form)
+      },
+      deep: true
+    }
   },
   computed: {
   },
   methods: {
+    updateFormByDevice(newForm, oldForm) {
+      if (this.device === undefined || this.device == null) {
+        return
+      }
+      if (this.device.deviceId !== this.form.deviceId) {
+        return
+      }
+      if (oldForm !==null && newForm.sensorName === oldForm.sensorName) {
+        return
+      }
+      this.form.tagName = ''
+      if ('sensors' in this.device) {
+        let sensor = this.device.sensors.find(sensor => 
+            (sensor.sensorName === newForm.sensorName) && 
+            ('tagDeviceId' in sensor) && 
+            (('tagDeviceGroup' in sensor) && (sensor.tagDeviceGroup === 'ela'))
+            )
+        if (sensor !== undefined && sensor !== null) {
+          this.form.tagName = sensor.tagDeviceId
+        }
+      }
+
+    },
+
     onSubmit(event) {
       event.preventDefault()
       // alert(JSON.stringify(this.form))
@@ -146,7 +179,6 @@ export default {
       }
       // let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/cooltrax_ui?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==&command=set_tag&sensor_index=${form.sensorIndex}&device_id=${form.deviceId}&tag_name=${form.tagName}&tag_address=${form.tagAddress}&run=true`
       let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/set_tag/calamp/${form.deviceId}/${form.sensorName}/${form.tagName}?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==&run=false`
-      console.log('url: ', apiUrl)
 
       fetch(apiUrl,  {
         method: "GET",
@@ -159,7 +191,6 @@ export default {
       // }) //response.json())
       .then(data => {
         // alert(JSON.stringify(data))
-        console.log('data: ', data)
         this.response = data
         console.log(this.response)
         this.$forceUpdate()
@@ -167,7 +198,6 @@ export default {
         this.$forceUpdate()
       }).catch((error) => {
         console.log('Error is:', error)
-        console.log('url:', apiUrl)
       })
     },
     onReset(event) {
@@ -188,7 +218,14 @@ export default {
     console.log('created')
     if (this.deviceId !== undefined) {
       this.form.deviceId = this.deviceId
+      let devices = this.$store.getters.devices
+      if (devices !== null && devices.length > 0) {
+        this.device = devices.find(device => device.deviceId === this.deviceId)
+      }
     }
+  },
+  mounted () {
+    this.updateFormByDevice(this.form, null)
   }
 }
 </script>
