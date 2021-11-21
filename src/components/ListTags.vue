@@ -15,7 +15,7 @@
           </b-form-input>
         </b-col>       
         <b-col align="end">
-          <b-button variant="info" v-b-toggle.collapseCreateNew>New</b-button>
+          <b-button variant="info" v-b-toggle.collapseCreateNew >New</b-button>
           <b-button variant="info" class="ml-1"  @click="refresh()">Refresh</b-button>
           <b-button id="buttonUpload" class="ml-1" variant="info" v-b-toggle.collapseUploadTags>Upload</b-button>
         </b-col>
