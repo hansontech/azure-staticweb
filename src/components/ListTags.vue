@@ -15,7 +15,8 @@
           </b-form-input>
         </b-col>       
         <b-col align="end">
-          <b-button variant="info" @click="refresh()">Refresh</b-button>
+          <b-button variant="info" v-b-toggle.collapseCreateNew>New</b-button>
+          <b-button variant="info" class="ml-1"  @click="refresh()">Refresh</b-button>
           <b-button id="buttonUpload" class="ml-1" variant="info" v-b-toggle.collapseUploadTags>Upload</b-button>
         </b-col>
     </b-row>
@@ -25,8 +26,8 @@
         {ELA Tag Name},{Bluetooth Address}<br/>
         For example, <br/>
         <tt>
-        PTX51234,0x123456780011 <br/>
-        PTX51235,0x123456880022
+        PTX51234,0x112233445566 <br/>
+        PTX51235,0x112233778899
         </tt>
         </p>
     </b-tooltip>
@@ -48,6 +49,20 @@
           </b-col>
           <b-col>
             <b-button variant="success" class="ml-1" v-b-toggle.collapseUploadTags @click="uploadTagFile(tagFile)">Confirm</b-button>
+          </b-col>
+        </b-row>
+    </b-collapse>
+    <b-collapse id="collapseCreateNew" class="mt-2">
+        <b-row align-v="center">
+          <b-col sm="4">
+            <b-form-input v-model="newTagName" placeholder="Tag name" type="text"></b-form-input>
+          </b-col>
+          <b-col sm="6">
+            <b-form-input v-model="newTagAddress" placeholder="Enter Bluetooth Address e.g. 0x112233445566 or 11:22:33:44:55:66" type="text"></b-form-input>
+          </b-col>
+          <b-col sm="2" align="end">
+            <b-button variant="success" v-b-toggle.collapseCreateNew @click="createNewTag()">Create</b-button>
+            <b-button variant="secondary" class="ml-1" v-b-toggle.collapseCreateNew>Cancel</b-button>
           </b-col>
         </b-row>
     </b-collapse>
@@ -94,6 +109,8 @@ export default {
   name: 'list_devices',
   data: function () {
     return {
+      newTagName: '',
+      newTagAddress: '',
       tagFile: null,
       devices: null,
       searchString: '',
@@ -105,6 +122,42 @@ export default {
   computed: {
   },
   methods: {
+    createNewTag(){
+      if ((this.newTagName !== '' && this.newTagAddress !== '') == false) {
+        return
+      }
+      let tagAddress = this.newTagAddress
+      if (this.newTagAddress.indexOf(':') > -1) {
+        tagAddress = '0x' + this.newTagAddress.replace(/:/g, '')
+      }
+      this.isLoading = true
+      let apiUrl = 'https://calamp-inbound-app.azurewebsites.net/api/cooltrax_ui'
+      fetch(apiUrl,  {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json;charset=UTF-8",
+          "x-functions-key": "JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==" 
+        },
+        body: JSON.stringify({
+          command: 'create_tag',
+          tag: {
+            groupId: 'ela',
+            deviceId: this.newTagName, 
+            bdAddr: tagAddress
+          }
+        })
+      })
+      .then(response => response.json())
+      .then(jsonData => {
+        console.log(jsonData)
+        this.loadDevices()
+        this.isLoading = false
+        this.$forceUpdate()
+      }).catch((error) => {
+        console.log(error)
+        this.isLoading = false
+      })
+    },
     resetTags() {
 
     },
