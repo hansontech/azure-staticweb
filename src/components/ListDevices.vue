@@ -36,6 +36,24 @@
             </div>                  
           </b-modal>
         <!-- img-src="/static/photo-54.png" -->
+        <b-modal id="modal-action-status" title="Calamp commands and responses" size="xl" ok-only>
+          <div v-if="actionCommands.length > 0">
+            <b-row class="font-weight-bold ml-1">
+              <b-col sm="2"> <tt>Parameter ID</tt> </b-col>
+              <b-col sm="1"> <tt>Index</tt> </b-col>
+              <b-col > <tt>Value</tt> </b-col>
+              <b-col> <tt>Updated Time</tt> </b-col>
+              <b-col align="center" sm="2"> <tt>Status</tt> </b-col>
+            </b-row>
+            <b-row class="ml-1" v-for="(command, index) in actionCommands" :key="index">
+              <b-col sm="2"> <tt>{{command.parameterId}}</tt> </b-col>
+              <b-col align="center" sm="1"> <tt>{{command.parameterIndex}}</tt> </b-col>
+              <b-col > <tt>{{command.parameterValue}}</tt> </b-col>
+              <b-col> <tt>{{command.eventTime}}</tt> </b-col>
+              <b-col align="center" sm="2"> <tt>{{command.status}}</tt> </b-col>
+            </b-row>
+          </div>
+        </b-modal>
         <b-card v-for="(device) in devices" :key="device.deviceId"
             header = " "
             >
@@ -73,7 +91,7 @@
                   <b>ELA Tag</b>
                 </b-col>
                </b-row>
-               <b-row class="ml-1" v-for="(tag) in device.sensors" :key="tag">
+               <b-row class="ml-1" v-for="(tag) in device.sensors" :key="tag.sensorName">
                 <b-col lg="4">
                   <tt>{{tag.sensorName}}</tt>
                 </b-col>
@@ -92,7 +110,25 @@
                </b-row>
               </b-col>
             </b-row>
-
+            <b-row class="mt-3 border" v-if="'working' in device && device.working.length > 0">
+              <b-col>
+               <b-row>
+                <b-col>Working process</b-col>
+               </b-row>
+               <b-row class="ml-1" v-for="(action, index) in device.working" :key="index">
+                <b-col>
+                  <b-row align-v="center">
+                    <b-col sm="2">{{(action.actionName === 'set_tag') ? 'Set tag' : action.actionName}}</b-col>
+                    <b-col><tt>{{action.sensorName}} uses {{action.tagName}}</tt></b-col>
+                    <b-col><tt>{{action.actionTime}}</tt></b-col>
+                    <b-col sm="2" align="end"> 
+                      <b-button size="sm" variant="light" @click="showActionStatus(action, device)">Logs</b-button>
+                    </b-col>
+                  </b-row>
+                </b-col>
+               </b-row>
+              </b-col>
+            </b-row>
           </b-card>
         </b-card-group>
       </b-col>
@@ -108,7 +144,8 @@ export default {
     return {
       devices: null,
       searchString: '',
-      isLoading: false
+      isLoading: false,
+      actionCommands: []
     }
   },
   watch: {
@@ -116,6 +153,20 @@ export default {
   computed: {
   },
   methods: {
+    showActionStatus(action, device) {
+      if (('commands' in device) === false) {
+        return
+      }
+      this.actionCommands = device.commands.filter( deviceCommand => {
+        return (
+          deviceCommand.actionName === action.actionName &&
+          deviceCommand.actionTime === action.actionTime
+        )
+      })
+      if (this.actionCommands.length > 0) {
+        this.$bvModal.show('modal-action-status')
+      }
+    },
     resetTags() {
 
     },
@@ -141,7 +192,7 @@ export default {
         // alert(JSON.stringify(response))
       // }) //response.json())
       .then(jsonData => {
-        console.log(jsonData)
+        // console.log(jsonData)
         this.devices = jsonData
         this.$store.commit('setDevices', this.devices)
         this.isLoading = false
