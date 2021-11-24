@@ -91,7 +91,7 @@
                 </b-col>
                 <!-- into 11:22:33:44:55:66 format -->
                 <b-col lg="2" align="end">
-                  <b-dropdown variant="secondary">
+                  <b-dropdown right variant="secondary">
                     <b-dropdown-item @click.stop="deleteTag(device)">Delete</b-dropdown-item>
                   </b-dropdown>
               </b-col>

@@ -25,7 +25,7 @@
     </b-row>
     <b-row class="mt-2" >
       <b-col class="at-scroll">
-        <b-card-group deck>
+        <!-- <b-card-group deck> -->
           <b-modal id="modalDeleteConfirm"
                 hide-header 
                 size="sm"
@@ -54,25 +54,23 @@
             </b-row>
           </div>
         </b-modal>
-        <b-card v-for="(device) in devices" :key="device.deviceId"
+        <b-card class="mb-2" v-for="(device) in devices" :key="device.deviceId"
             header = " "
             >
             <b-row align-v="center">
-              <b-col lg="9">
+              <b-col col="2">
                 <h5 class="card-text">
                   {{device.deviceId}}
                 </h5>
               </b-col>
-              <b-col lg="3" align="end">
-                <b-dropdown variant="secondary">
+              <b-col col="7">
+                Mapped to UMD <b>{{device.umdName}}</b>
+              </b-col>
+              <b-col col="3" align="end">
+                <b-dropdown right variant="secondary">
                   <b-dropdown-item @click.stop="resetTags(device)">Reset tags</b-dropdown-item>
                   <b-dropdown-item :href="'set_tag/' + device.deviceId">Set tags</b-dropdown-item>
                 </b-dropdown>
-              </b-col>
-            </b-row>
-            <b-row class="mt-2">
-              <b-col>
-                Mapped to UMD <b>{{device.umdName}}</b>
               </b-col>
             </b-row>
             <b-row class="mt-2" v-if="'sensors' in device && device.sensors.length > 0">
@@ -80,25 +78,25 @@
                <b-row>
                 <b-col>Sensors</b-col>
                </b-row>
-               <b-row class="ml-1">
-                <b-col lg="4">
-                  <b>Name</b>
+               <b-row class="ml-1 border-bottom border-gray">
+                <b-col col="4">
+                  Name
                 </b-col>
-                <b-col lg="4">
-                  <b>Tag Serial</b>
+                <b-col col="4">
+                  Tag Serial
                 </b-col>
-                <b-col lg="4">
-                  <b>ELA Tag</b>
+                <b-col col="4">
+                  ELA Tag
                 </b-col>
                </b-row>
                <b-row class="ml-1" v-for="(tag) in device.sensors" :key="tag.sensorName">
-                <b-col lg="4">
+                <b-col col="4">
                   <tt>{{tag.sensorName}}</tt>
                 </b-col>
-                <b-col lg="4">
+                <b-col col="4">
                   <tt>{{('tagSerialNumber' in tag) ? tag.tagSerialNumber : ''}}</tt>
                 </b-col>
-                <b-col lg="4">
+                <b-col col="4">
                   <tt>{{('tagDeviceId' in tag) ? tag.tagDeviceId : ''}}</tt>
                 </b-col>
                 <!--
@@ -121,7 +119,7 @@
                     <b-col sm="2">{{(action.actionName === 'set_tag') ? 'Set tag' : action.actionName}}</b-col>
                     <b-col><tt>{{action.sensorName}} uses {{action.tagName}}</tt></b-col>
                     <b-col><tt>{{action.actionTime}}</tt></b-col>
-                    <b-col sm="2" align="center"> 
+                    <b-col sm="2"> 
                       <b-button size="sm" variant="light" @click="showActionStatus(action, device)">Logs</b-button>
                     </b-col>
                   </b-row>
@@ -130,7 +128,7 @@
               </b-col>
             </b-row>
           </b-card>
-        </b-card-group>
+        <!-- </b-card-group> -->
       </b-col>
     </b-row>
   </b-container>
