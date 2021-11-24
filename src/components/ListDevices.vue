@@ -121,7 +121,7 @@
                     <b-col sm="2">{{(action.actionName === 'set_tag') ? 'Set tag' : action.actionName}}</b-col>
                     <b-col><tt>{{action.sensorName}} uses {{action.tagName}}</tt></b-col>
                     <b-col><tt>{{action.actionTime}}</tt></b-col>
-                    <b-col sm="2" align="end"> 
+                    <b-col sm="2" align="center"> 
                       <b-button size="sm" variant="light" @click="showActionStatus(action, device)">Logs</b-button>
                     </b-col>
                   </b-row>
