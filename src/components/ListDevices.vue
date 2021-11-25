@@ -111,7 +111,7 @@
             <b-row class="mt-3 border" v-if="'working' in device && device.working.length > 0">
               <b-col>
                <b-row>
-                <b-col>Working process</b-col>
+                <b-col>Working tasks</b-col>
                </b-row>
                <b-row class="ml-1" v-for="(action, index) in device.working" :key="index">
                 <b-col>

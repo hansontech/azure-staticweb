@@ -33,6 +33,9 @@
     </b-col> </b-row>
     </div>
   </b-modal>
+  <b-row class = "mt-2" v-if="isRunning" align-v="center" align-h="center" > 
+        <b-spinner/>
+  </b-row>
   <b-form @submit="onSubmit" @reset="onReset" v-if="show">
     <b-form-group
         id="input-group-1"
@@ -98,8 +101,9 @@
       ></b-form-input>
     </b-form-group>
     -->
-    <b-button type="submit" variant="info">Submit</b-button>
+    <b-button type="submit" variant="info" style="width: 70px">Set</b-button>
     <b-button type="reset" variant="info" class="ml-2">Reset</b-button>
+    <b-button variant="info" class="ml-2" @click="returnBack()">Back</b-button> 
     <!--
     <div class="mt-2">
       <b-button variant="primary" @click="login()">Login</b-button>
@@ -131,7 +135,8 @@ export default {
       },
       device: null,
       response: null,
-      show: true
+      show: true,
+      isRunning: false
     }
   },
   watch: {
@@ -169,7 +174,9 @@ export default {
       }
 
     },
-
+    returnBack() {
+      this.$router.go(-1)
+    },
     onSubmit(event) {
       event.preventDefault()
       // alert(JSON.stringify(this.form))
@@ -178,8 +185,9 @@ export default {
         form.tagAddress = '0x' + form.tagAddress.replace(/:/g, '')
       }
       // let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/cooltrax_ui?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==&command=set_tag&sensor_index=${form.sensorIndex}&device_id=${form.deviceId}&tag_name=${form.tagName}&tag_address=${form.tagAddress}&run=true`
-      let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/set_tag/calamp/${form.deviceId}/${form.sensorName}/${form.tagName}?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==&run=false`
+      let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/set_tag/calamp/${form.deviceId}/${form.sensorName}/${form.tagName}?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==` // &run=false`
 
+      this.isRunning = true
       fetch(apiUrl,  {
         method: "GET",
         headers: {"Content-type": "application/json;charset=UTF-8"}
@@ -192,6 +200,7 @@ export default {
       .then(data => {
         // alert(JSON.stringify(data))
         this.response = data
+        this.isRunning = false
         console.log(this.response)
         this.$forceUpdate()
         this.$bvModal.show('modal-response')
