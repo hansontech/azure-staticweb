@@ -15,7 +15,10 @@
           </b-form-input>
         </b-col>          
         <b-col align="end">
-          <b-button variant="info" @click="refresh()">Refresh</b-button>
+          <b-button variant="info" v-b-popover.hover.bottom="'reload the devices'" @click="refresh()">Refresh</b-button>
+        </b-col>
+        <b-col align="end">
+          <b-button variant="info" v-b-popover.hover.bottom="'Sync with CalAmp devices in Cooltrax account'" @click="calampSync()">CalAmp Sync</b-button>
         </b-col>
     </b-row>
     <b-row class="mt-2" style="border-bottom: 1px solid green;">
@@ -167,6 +170,23 @@ export default {
     },
     resetTags() {
 
+    },
+    calampSync() {
+      this.isLoading = true
+      let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/cooltrax_ui?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==&command=sync_calamp_devices`
+
+      fetch(apiUrl, {
+        method: "GET",
+        headers: {"Content-type": "application/json;charset=UTF-8"}
+      })
+      .then(response => response.json())
+      .then(jsonData => {
+        console.log(jsonData)
+        this.loadDevices()
+      }).catch((error) => {
+        console.log(error)
+        this.isLoading = false
+      })
     },
     refresh() {
       this.loadDevices()
