@@ -57,22 +57,38 @@
             </b-row>
           </div>
         </b-modal>
+        <b-modal id="modal-action-read-tag-setting"
+                hide-header 
+                size="sm"
+                @ok="readTagSettingConfirm(readTagSettingDevice, readTagSettingSensorName)"
+                >
+            <div>
+              <h5>Read device's tag setting</h5>
+              <b-form-group
+                  label="Sensor(s) to read"
+                  description=""
+              >
+                <b-form-select v-model="readTagSettingSensorName" :options="readTagSettingSensorOptions"></b-form-select>
+              </b-form-group>
+            </div>                  
+        </b-modal>
         <b-card class="mb-2" v-for="(device) in devices" :key="device.deviceId"
             header = " "
             >
             <b-row align-v="center">
-              <b-col col="2">
+              <b-col sm="2">
                 <h5 class="card-text">
                   {{device.deviceId}}
                 </h5>
               </b-col>
-              <b-col col="7">
+              <b-col sm="7">
                 Mapped to UMD <b>{{device.umdName}}</b>
               </b-col>
-              <b-col col="3" align="end">
+              <b-col sm="3" align="end">
                 <b-dropdown right variant="secondary">
                   <b-dropdown-item @click.stop="resetTags(device)">Reset tags</b-dropdown-item>
                   <b-dropdown-item :href="'set_tag/' + device.deviceId">Set tags</b-dropdown-item>
+                  <b-dropdown-item @click.stop="readTagSetting(device)">Read tag setting</b-dropdown-item>
                 </b-dropdown>
               </b-col>
             </b-row>
@@ -82,24 +98,24 @@
                 <b-col>Sensors</b-col>
                </b-row>
                <b-row class="ml-1 border-bottom border-gray">
-                <b-col col="4">
-                  Name
+                <b-col v-b-popover.hover.bottom="'Sensor\'s name in CalAmp device'" sm="4">
+                  Sensor Name
                 </b-col>
-                <b-col col="4">
-                  Tag Serial
+                <b-col v-b-popover.hover.bottom="'Tag\'s Cooltrax Serial Number'" sm="4">
+                  Cooltrax Serial
                 </b-col>
-                <b-col col="4">
-                  ELA Tag
+                <b-col sm="4">
+                  ELA Tag Name
                 </b-col>
                </b-row>
                <b-row class="ml-1" v-for="(tag) in device.sensors" :key="tag.sensorName">
-                <b-col col="4">
+                <b-col sm="4">
                   <tt>{{tag.sensorName}}</tt>
                 </b-col>
-                <b-col col="4">
+                <b-col sm="4">
                   <tt>{{('tagSerialNumber' in tag) ? tag.tagSerialNumber : ''}}</tt>
                 </b-col>
-                <b-col col="4">
+                <b-col sm="4">
                   <tt>{{('tagDeviceId' in tag) ? tag.tagDeviceId : ''}}</tt>
                 </b-col>
                 <!--
@@ -111,6 +127,41 @@
                </b-row>
               </b-col>
             </b-row>
+            <b-row class="mt-2" v-if="'sensors' in device && sensorTagSettingReadings(device).length > 0">
+              <b-col>
+                <b-row>
+                  <b-col>Sensor Readings</b-col>
+                </b-row>
+                <b-row class="ml-1 border-bottom border-gray">
+                  <b-col sm="3">
+                    Sensor Name
+                  </b-col>
+                  <b-col sm="3">
+                    BD Address OUI
+                  </b-col>
+                  <b-col sm="3">
+                    Tag Name 1
+                  </b-col>
+                  <b-col sm="3">
+                    Tag Name 2
+                  </b-col>
+                </b-row>
+                <b-row class="ml-1" v-for="(tag) in sensorTagSettingReadings(device)" :key="tag.sensorName">
+                  <b-col sm="3">
+                    <tt>{{tag.sensorName}}</tt>
+                  </b-col>
+                  <b-col sm="3" v-b-popover.hover.bottom="('bdAddressOui' in tag['readTagSettings']) ? tag['readTagSettings'].bdAddressOui.readTime : ''">
+                    <tt >{{('bdAddressOui' in tag['readTagSettings']) ? tag['readTagSettings'].bdAddressOui.value.toString(16).toUpperCase() : ''}}</tt>
+                  </b-col>
+                  <b-col sm="3" v-b-popover.hover.bottom="('tagName1' in tag['readTagSettings']) ? tag['readTagSettings'].tagName1.readTime : ''">
+                    <tt>{{('tagName1' in tag['readTagSettings']) ? tag['readTagSettings'].tagName1.value : ''}}</tt>
+                  </b-col>
+                  <b-col sm="3" v-b-popover.hover.bottom="('tagName2' in tag['readTagSettings']) ? tag['readTagSettings'].tagName2.readTime : ''">
+                    <tt>{{('tagName2' in tag['readTagSettings']) ? tag['readTagSettings'].tagName2.value : ''}}</tt>
+                  </b-col>
+                </b-row>
+              </b-col>
+            </b-row>  
             <b-row class="mt-3 border" v-if="'jobs' in device && device.jobs.length > 0">
               <b-col>
                <b-row>
@@ -119,7 +170,7 @@
                <b-row class="ml-1" v-for="(action, index) in device.jobs" :key="index">
                 <b-col>
                   <b-row align-v="center">
-                    <b-col sm="2">{{(action.actionName === 'set_tag') ? 'Set tag' : action.actionName}}</b-col>
+                    <b-col sm="2">{{action.actionName}}</b-col>
                     <b-col><tt>{{action.sensorName}} uses {{action.tagName}}</tt></b-col>
                     <b-col><tt>{{action.actionTime}}</tt></b-col>
                     <b-col sm="2"> 
@@ -146,7 +197,15 @@ export default {
       devices: null,
       searchString: '',
       isLoading: false,
-      actionCommands: []
+      actionCommands: [],
+      readTagSettingDevice: null,
+      readTagSettingSensorName: '',
+      readTagSettingSensorOptions: [
+          { value: '', text: 'All'},
+          { value: 'temperature1', text: 'Temperature Sensor 1' },
+          { value: 'temperature2', text: 'Temperature Sensor 2' },
+          { value: 'door', text: 'Door Sensor' }
+      ],
     }
   },
   watch: {
@@ -170,6 +229,39 @@ export default {
     },
     resetTags() {
 
+    },
+    sensorTagSettingReadings(device) {
+      let sensorsWithReadings = device.sensors.filter(sensor => {
+        return ('readTagSettings' in sensor)
+      })
+      return sensorsWithReadings
+    },
+    readTagSetting(device) {
+      this.readTagSettingDevice = device
+      this.$bvModal.show('modal-action-read-tag-setting')
+    },
+    readTagSettingConfirm(device, sensorName) {
+      console.log('sensorName:', sensorName)
+      this.isLoading = true
+      let sensorToRead = ''
+      if (sensorName !== '') {
+        sensorToRead = '/' + sensorName
+      }
+      let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/read_tag_setting/${device.deviceId}${sensorToRead}?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==`
+      console.log('url:', apiUrl)
+      fetch(apiUrl, {
+        method: "GET",
+        headers: {"Content-type": "application/json;charset=UTF-8"}
+      })
+      .then(response => response.json())
+      .then(jsonData => {
+        console.log(jsonData)
+        this.isLoading = false
+        this.$forceUpdate()
+      }).catch((error) => {
+        console.log(error)
+        this.isLoading = false
+      })
     },
     calampSync() {
       this.isLoading = true
