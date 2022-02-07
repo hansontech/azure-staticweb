@@ -81,7 +81,12 @@
                   {{device.deviceId}}
                 </h5>
               </b-col>
-              <b-col sm="7">
+              <b-col sm="2">
+                <h6 class="card-text">
+                  ESN is {{device.esn}}
+                </h6>
+              </b-col>
+              <b-col sm="5">
                 Mapped to UMD <b>{{device.umdName}}</b>
               </b-col>
               <b-col sm="3" align="end">
@@ -89,6 +94,7 @@
                   <b-dropdown-item @click.stop="resetTags(device)">Reset tags</b-dropdown-item>
                   <b-dropdown-item :href="'set_tag/' + device.deviceId">Set tags</b-dropdown-item>
                   <b-dropdown-item @click.stop="readTagSetting(device)">Read tag setting</b-dropdown-item>
+                  <b-dropdown-item @click.stop="rebootDevice(device)">Reboot device</b-dropdown-item>
                 </b-dropdown>
               </b-col>
             </b-row>
@@ -249,6 +255,23 @@ export default {
       }
       let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/read_tag_setting/${device.deviceId}${sensorToRead}?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==`
       console.log('url:', apiUrl)
+      fetch(apiUrl, {
+        method: "GET",
+        headers: {"Content-type": "application/json;charset=UTF-8"}
+      })
+      .then(response => response.json())
+      .then(jsonData => {
+        console.log(jsonData)
+        this.isLoading = false
+        this.$forceUpdate()
+      }).catch((error) => {
+        console.log(error)
+        this.isLoading = false
+      })
+    },
+    rebootDevice(device) {
+      this.isLoading = true
+      let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/reboot_device/${device.deviceId}?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==`
       fetch(apiUrl, {
         method: "GET",
         headers: {"Content-type": "application/json;charset=UTF-8"}
