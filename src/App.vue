@@ -7,9 +7,10 @@
       </b-navbar-brand>
       <b-collapse is-nav id="nav_collapse">
         <b-navbar-nav>
-          <b-nav-item href="/list_devices">List Devices</b-nav-item>
-          <b-nav-item href="/set_tag" >Set Tags</b-nav-item>
-          <b-nav-item href="/list_tags" >List Tags</b-nav-item>
+          <b-nav-item href="/list_devices">List CalAmp Devices</b-nav-item>
+          <!-- <b-nav-item href="/set_tag" >Set ELA Tags</b-nav-item> -->
+          <b-nav-item href="/list_tags" >List ELA Tags</b-nav-item>
+          <b-nav-item href="/list_sensortags" >List SensorTags</b-nav-item>
         </b-navbar-nav>
         <!-- Right aligned nav items -->
         <b-navbar-nav class="ml-auto">
