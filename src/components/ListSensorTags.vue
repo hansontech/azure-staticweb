@@ -171,7 +171,7 @@ export default {
         readInterval: null,
         reportInterval: null
       },
-      goldfishApiUrl: `https://calamp-inbound-app.azurewebsites.net/api/goldfish_command?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==`, // 'https://goldfish-inbloud-app.azurewebsites.net/api/cooltrax_ui?code=ysA2sxn4pQV9FKlC3pteLuwrjmCPyFALlAakC96XKGEHSg5BcqP25A==',
+      goldfishApiUrl: `https://goldfish-inbound-app.azurewebsites.net/api/goldfish_command?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`,
       goldfishApiData: {
         method: "POST",
         headers: {
@@ -233,6 +233,9 @@ export default {
       })
     },
     enableDisableLog(device, toEnableDisable) {
+      if ('gateway' in device === false) {
+        return
+      }
       this.isLoading = true
       this.goldfishApiData.body = JSON.stringify({
           module: 'sensortag',
@@ -276,6 +279,9 @@ export default {
       })
     },
     systemReset(device) {
+      if ('gateway' in device === false) {
+        return
+      }
       this.isLoading = true
       this.goldfishApiData.body = JSON.stringify({
           module: 'sensortag',
@@ -295,6 +301,9 @@ export default {
       })
     },
     factoryReset(device) {
+      if ('gateway' in device === false) {
+        return
+      }
       this.isLoading = true
       this.goldfishApiData.body = JSON.stringify({
           module: 'sensortag',
@@ -314,6 +323,9 @@ export default {
       })
     },
     enterShippingMode(device) {
+      if ('gateway' in device === false) {
+        return
+      }
       this.isLoading = true
       this.goldfishApiData.body = JSON.stringify({
           module: 'sensortag',
