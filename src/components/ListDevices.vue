@@ -210,7 +210,8 @@ export default {
           { value: '', text: 'All'},
           { value: 'temperature1', text: 'Temperature Sensor 1' },
           { value: 'temperature2', text: 'Temperature Sensor 2' },
-          { value: 'door', text: 'Door Sensor' }
+          { value: 'door', text: 'Door Sensor' },
+          { value: 'rearDoor', text: 'Rear Door Sensor' }
       ],
     }
   },

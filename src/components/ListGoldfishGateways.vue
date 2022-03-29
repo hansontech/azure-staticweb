@@ -4,7 +4,7 @@
   <b-container fluid style="padding-right: 30px; padding-left: 30px; margin-top:75px; margin-left:0px; margin-right:0px"> 
     <b-row class="mt-5" align-v="center">
       <b-col align="start" sm="4">
-          <h4>SensorTags <small>({{(devices !== null) ? devices.length : 0}})</small></h4>
+          <h4>Goldfish Gateways <small>({{(devices !== null) ? devices.length : 0}})</small></h4>
         </b-col>
         <b-col sm="4">
           <b-form-input class="at-border"
@@ -131,18 +131,16 @@
         <b>
         <b-row class="mt-2">
                 <b-col>
-                  SensorTag Id
+                  Device Id
                 </b-col>
                 <b-col>
-                  Gateway connected
+                  IMEI
                 </b-col>
                 <b-col>
-                  Logging enable
-                </b-col>
-                <b-col>
-                  Logging intervals 
+                  SensorTags
                 </b-col>
                 <b-col lg="1"> 
+                  Commands
                 </b-col>
                 <b-col lg="2" align="end">
                 </b-col>
@@ -157,30 +155,29 @@
                   {{(device !== null) ? device.deviceId : 'unknown'}}
                 </b-col>
                 <b-col>
-                  {{('gateway' in device) ? device.gateway.deviceId : 'unknown'}}
+                  {{('IMEI' in device) ? device.IMEI : ''}}
                 </b-col>
                 <b-col>
-                  {{('dataLog' in device) ? device.dataLog : 'unknown'}}
-                </b-col>
-                <b-col>
-                  {{('dataLogInterval' in device) ? (device.dataLogInterval.read + ' : ' + device.dataLogInterval.report) : 'unknown'}}
+                  <b-row v-if="'sensortags' in device && device.sensortags.length > 0" class="mt-2">
+                    <b-col>
+                      <b-list-group-item v-for="(sensortagNo, index) in device.sensortags" :key="index" header = " ">
+                        <b-row>
+                          <b-col>
+                            {{sensortagNo}} 
+                          </b-col>
+                        </b-row>
+                      </b-list-group-item>
+                    </b-col>
+                  </b-row>
                 </b-col>
                 <b-col lg="1" v-b-popover.hover.bottom="'command logs'">
                   <b-button variant="info" @click="loadCommandLogs(device)">Logs</b-button>
                 </b-col>
                 <b-col lg="2" align="end">
                   <b-dropdown right variant="secondary">
-                    <b-dropdown-item @click.stop="setIntervals(device)">Logging intervals</b-dropdown-item>
-                    <b-dropdown-item @click.stop="enableDisableLog(device, 'enable')">Enable logging</b-dropdown-item>
-                    <b-dropdown-item @click.stop="enableDisableLog(device, 'disable')">Disable logging</b-dropdown-item>
-                    <b-dropdown-item @click.stop="clearAllLogs(device)">Clear all logs</b-dropdown-item>
-                    <b-dropdown-item @click.stop="systemReset(device)">System reset</b-dropdown-item>
-                    <b-dropdown-item @click.stop="factoryReset(device)">Factory reset</b-dropdown-item>
-                    <b-dropdown-item @click.stop="enterShippingMode(device)">Enter shipping mode</b-dropdown-item>
-                    <b-dropdown-item @click.stop="exitLongRangeMode(device)">Exit from Long Range</b-dropdown-item>
-                    <b-dropdown-divider/>
-                    <b-dropdown-item @click.stop="setDeviceSerial(device)">New serial number</b-dropdown-item>
-                    <b-dropdown-item @click.stop="setBlePasskey(device)">New passkey</b-dropdown-item>
+                    <b-dropdown-item @click.stop="setHeartbeatPeriod(device)">Heartbeat Period</b-dropdown-item>
+                    <b-dropdown-item @click.stop="addSensortag(device)">Add new SensorTag</b-dropdown-item>
+                    <b-dropdown-item @click.stop="removeSensortag(device)">Remove a SensorTag</b-dropdown-item>
                     </b-dropdown>
               </b-col>
             </b-row>
@@ -201,6 +198,9 @@
                 <perfect-scrollbar>
                 <b-list-group-item v-for="(commandLog) in device.commandLogs.slice().reverse()" :key="commandLog.timestamp" header = " ">
                   <b-row>
+                    <b-col>
+                      {{commandLog.detail.module}} 
+                    </b-col>
                     <b-col>
                       {{commandLog.detail.command + (('action' in commandLog.detail) ? ('-' + commandLog.detail.action) : '')}} 
                     </b-col>
@@ -271,7 +271,7 @@ export default {
     loadCommandLogs(device) {
       console.log('test command logs')
       this.isLoading = true
-      fetch( `https://goldfish-inbound-app.azurewebsites.net/api/list_sensortag_command_logs/${device.deviceId}?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`,
+      fetch( `https://goldfish-inbound-app.azurewebsites.net/api/list_gateway_command_logs/${device.deviceId}?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`,
       {
           method: "GET",
           headers: {
@@ -282,258 +282,6 @@ export default {
       .then(jsonData => {
         console.log(jsonData)
         device.commandLogs = jsonData.commandLogs
-        this.isLoading = false
-      }).catch((error) => {
-        console.log(error)
-        this.isLoading = false
-      })
-    },
-    setIntervals(device) {
-      if ('gateway' in device === false) {
-        // need a gateway to send the command
-        return
-      }
-      this.setIntervalsData.device = device
-      if ('dataLogInterval' in device) {
-        this.setIntervalsData.readInterval = device.dataLogInterval.read
-        this.setIntervalsData.reportInterval = device.dataLogInterval.report
-      } 
-      this.$bvModal.show('modal-tag-interval-setting')
-    },
-    setIntervalsConfirm(setIntervalsData) {
-      if (setIntervalsData.readInterval === null ||
-            setIntervalsData.reportInterval === null ) {
-        return
-      }
-      setIntervalsData.readInterval = Math.round(setIntervalsData.readInterval)
-      setIntervalsData.reportInterval = Math.round(setIntervalsData.reportInterval)
-      
-      this.isLoading = true
-      this.goldfishApiData['body'] = JSON.stringify({
-          module: 'sensortag',
-          command: 'dataLogInterval',
-          action: 'set',
-          device: setIntervalsData.device.gateway.deviceId,          
-          sensortag: setIntervalsData.device.deviceId,
-          dataLogInterval: {
-            read: setIntervalsData.readInterval,
-            record: 1,
-            report: setIntervalsData.reportInterval
-          }
-      })
-
-      fetch(this.goldfishApiUrl,
-         this.goldfishApiData)
-      .then(response => response.json())
-      .then(jsonData => {
-        console.log(jsonData)
-        if ('error' in jsonData) {
-          console.log('request error: ', jsonData['error'])
-        }
-        this.isLoading = false
-      }).catch((error) => {
-        console.log(error)
-        this.isLoading = false
-      })
-    },
-    setDeviceSerial(device) {
-      if ('gateway' in device === false) {
-        // need a gateway to send the command
-        return
-      }
-      this.setDeviceSerialData.device = device
-      this.setDeviceSerialData.deviceSerial = Number(device.deviceId)
-      this.$bvModal.show('modal-set-device-serial')
-    },
-    setDeviceSerialConfirm(setDeviceSerialData) {
-      if (setDeviceSerialData.deviceSerial === null ) {
-        return
-      }
-      this.isLoading = true
-      this.goldfishApiData['body'] = JSON.stringify({
-          module: 'sensortag',
-          command: 'deviceSerial',
-          action: 'set',
-          device: setDeviceSerialData.device.gateway.deviceId,          
-          sensortag: setDeviceSerialData.device.deviceId,
-          serial: setDeviceSerialData.deviceSerial
-      })
-
-      fetch(this.goldfishApiUrl,
-         this.goldfishApiData)
-      .then(response => response.json())
-      .then(jsonData => {
-        console.log(jsonData)
-        this.isLoading = false
-      }).catch((error) => {
-        console.log(error)
-        this.isLoading = false
-      })
-    },
-    setBlePasskey(device) {
-      if ('gateway' in device === false) {
-        // need a gateway to send the command
-        return
-      }
-      this.setBlePasskeyData.device = device
-      this.setBlePasskeyData.blePasskey = null
-      this.$bvModal.show('modal-set-ble-passkey')
-    },
-    setBlePasskeyConfirm(setBlePasskeyData) {
-      if (setBlePasskeyData.blePasskey === null || setBlePasskeyData.blePasskey === '') {
-        return
-      }
-      this.isLoading = true
-      this.goldfishApiData['body'] = JSON.stringify({
-          module: 'sensortag',
-          command: 'blePasskey',
-          action: 'set',
-          device: setBlePasskeyData.device.gateway.deviceId,          
-          sensortag: setBlePasskeyData.device.deviceId,
-          passkey: setBlePasskeyData.blePasskey
-      })
-
-      fetch(this.goldfishApiUrl,
-         this.goldfishApiData)
-      .then(response => response.json())
-      .then(jsonData => {
-        console.log(jsonData)
-        this.isLoading = false
-      }).catch((error) => {
-        console.log(error)
-        this.isLoading = false
-      })
-    },
-    enableDisableLog(device, toEnableDisable) {
-      if ('gateway' in device === false) {
-        return
-      }
-      this.isLoading = true
-      this.goldfishApiData.body = JSON.stringify({
-          module: 'sensortag',
-          command: 'dataLog',
-          action: toEnableDisable,  // 'enable' 'disable'
-          device: device.gateway.deviceId,          
-          sensortag: device.deviceId
-      })
-      fetch(this.goldfishApiUrl,
-         this.goldfishApiData)
-      .then(response => response.json())
-      .then(jsonData => {
-        console.log(jsonData)
-        this.isLoading = false
-      }).catch((error) => {
-        console.log(error)
-        this.isLoading = false
-      })
-    },
-    clearAllLogs(device) {
-      if ('gateway' in device === false) {
-        return
-      }
-      this.isLoading = true     
-      this.goldfishApiData['body'] = JSON.stringify({
-          module: 'sensortag',
-          command: 'dataLog',
-          action: 'clear',
-          device: device.gateway.deviceId,          
-          sensortag: device.deviceId
-      })
-      fetch(this.goldfishApiUrl,
-         this.goldfishApiData)
-      .then(response => response.json())
-      .then(jsonData => {
-        console.log(jsonData)
-        this.isLoading = false
-      }).catch((error) => {
-        console.log(error)
-        this.isLoading = false
-      })
-    },
-    systemReset(device) {
-      if ('gateway' in device === false) {
-        return
-      }
-      this.isLoading = true
-      this.goldfishApiData.body = JSON.stringify({
-          module: 'sensortag',
-          command: 'systemReset',
-          device: device.gateway.deviceId,          
-          sensortag: device.deviceId
-      })
-      fetch(this.goldfishApiUrl,
-         this.goldfishApiData)
-      .then(response => response.json())
-      .then(jsonData => {
-        console.log(jsonData)
-        this.isLoading = false
-      }).catch((error) => {
-        console.log(error)
-        this.isLoading = false
-      })
-    },
-    factoryReset(device) {
-      if ('gateway' in device === false) {
-        return
-      }
-      this.isLoading = true
-      this.goldfishApiData.body = JSON.stringify({
-          module: 'sensortag',
-          command: 'factoryReset',
-          device: device.gateway.deviceId,          
-          sensortag: device.deviceId
-      })
-      fetch(this.goldfishApiUrl,
-         this.goldfishApiData)
-      .then(response => response.json())
-      .then(jsonData => {
-        console.log(jsonData)
-        this.isLoading = false
-      }).catch((error) => {
-        console.log(error)
-        this.isLoading = false
-      })
-    },
-    enterShippingMode(device) {
-      if ('gateway' in device === false) {
-        return
-      }
-      this.isLoading = true
-      this.goldfishApiData.body = JSON.stringify({
-          module: 'sensortag',
-          command: 'shippingMode',
-          action: 'enter',
-          device: device.gateway.deviceId,          
-          sensortag: device.deviceId
-      })
-      fetch(this.goldfishApiUrl,
-         this.goldfishApiData)
-      .then(response => response.json())
-      .then(jsonData => {
-        console.log(jsonData)
-        this.isLoading = false
-      }).catch((error) => {
-        console.log(error)
-        this.isLoading = false
-      })
-    },
-    exitLongRangeMode(device) {
-      if ('gateway' in device === false) {
-        return
-      }
-      this.isLoading = true
-      this.goldfishApiData.body = JSON.stringify({
-          module: 'sensortag',
-          command: 'longRangeMode',
-          action: 'exit',
-          device: device.gateway.deviceId,          
-          sensortag: device.deviceId
-      })
-      fetch(this.goldfishApiUrl,
-         this.goldfishApiData)
-      .then(response => response.json())
-      .then(jsonData => {
-        console.log(jsonData)
         this.isLoading = false
       }).catch((error) => {
         console.log(error)
@@ -638,7 +386,7 @@ export default {
       if (this.searchString !== null || this.searchString !=='') {
         withSearchString = '/' + this.searchString
       }
-      let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/list_devices/gfishstag${withSearchString}?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==`
+      let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/list_devices/gfishgway${withSearchString}?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==`
       fetch(apiUrl,  {
         method: "GET",
         headers: {"Content-type": "application/json;charset=UTF-8"}
@@ -649,7 +397,7 @@ export default {
         // alert(JSON.stringify(response))
       // }) //response.json())
       .then(jsonData => {
-        console.log('sensortags:', jsonData)
+        console.log('gateways:', jsonData)
         this.devices = jsonData
         this.isLoading = false
         // this.$forceUpdate()

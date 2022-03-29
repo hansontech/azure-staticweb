@@ -8,6 +8,7 @@ import TagSetting from '@/components/TagSetting'
 import ListDevices from '@/components/ListDevices'
 import ListTags from '@/components/ListTags'
 import ListSensorTags from '@/components/ListSensorTags'
+import ListGoldfishGateways from '@/components/ListGoldfishGateways'
 import store from '../store'
 // vue-router reference
 // https://router.vuejs.org/guide/essentials/named-routes.html
@@ -77,6 +78,15 @@ const router = new VueRouter({
       component: ListSensorTags,
       meta: {
         title: 'List SensorTags',
+        auth: true
+      }
+    },
+    {
+      path: '/list_goldfish_gateways',
+      name: 'list_goldfish_gateways',
+      component: ListGoldfishGateways,
+      meta: {
+        title: 'List Goldfish Gateways',
         auth: true
       }
     },

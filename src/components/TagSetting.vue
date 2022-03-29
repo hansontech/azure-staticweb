@@ -125,6 +125,7 @@ export default {
           { value: 'door', text: 'Door Sensor' },
           { value: 'temperature1', text: 'Temperature Sensor 1' },
           { value: 'temperature2', text: 'Temperature Sensor 2' },
+          { value: 'rearDoor', text: 'Rear Door Sensor' }
       ],
       oldForm: null,
       form: {

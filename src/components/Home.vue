@@ -4,8 +4,7 @@
   <b-container fluid style="padding-right: 0px; padding-left: 0px; margin-top:75px; margin-left:0px; margin-right:0px"> 
       <b-row class="mt-4">
         <b-col align="center">
-          <h2>Demo App for CalAmp Integration</h2>
-          <h3>Select Above Items to Run</h3>
+          <h2 class="mt-4">Demo App for Device Management</h2>
 
         </b-col>
       </b-row>

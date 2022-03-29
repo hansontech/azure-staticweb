@@ -10,6 +10,12 @@ import store from './store/index.js'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
+import PerfectScrollbar from 'vue2-perfect-scrollbar'
+import 'vue2-perfect-scrollbar/dist/vue2-perfect-scrollbar.css'
+
+Vue.use(PerfectScrollbar)
+
+
 const hostUrl = window.location.protocol + '//' + window.location.host
 console.log('host url: ', hostUrl)
 
