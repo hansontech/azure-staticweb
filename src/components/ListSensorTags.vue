@@ -638,7 +638,8 @@ export default {
       if (this.searchString !== null || this.searchString !=='') {
         withSearchString = '/' + this.searchString
       }
-      let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/list_devices/gfishstag${withSearchString}?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==`
+      // let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/list_devices/gfishstag${withSearchString}?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==`
+      let apiUrl = `https://goldfish-inbound-app.azurewebsites.net/api/list_devices/gfishstag${withSearchString}?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`
       fetch(apiUrl,  {
         method: "GET",
         headers: {"Content-type": "application/json;charset=UTF-8"}

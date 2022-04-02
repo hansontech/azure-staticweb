@@ -66,17 +66,17 @@
           </b-col>
         </b-row>
     </b-collapse>
-    <b-modal id="modal-set-device-serial"
+    <b-modal id="modal-set-heartbeat-period"
         hide-header 
-        @ok="setDeviceSerialConfirm(setDeviceSerialData)"
+        @ok="setHeartbeatPeriodConfirm(setHeartbeatPeriodData)"
         >
         <div>
-          <h5>{{(setDeviceSerialData.device !== null) ? setDeviceSerialData.device.deviceId : ''}}'s device Id / serial number</h5>
+          <h5>{{(setHeartbeatPeriodData.device !== null) ? setHeartbeatPeriodData.device.deviceId : ''}}'s heartbeat period</h5>
             <b-form-input class="at-border"
               type="number" 
-              v-model="setDeviceSerialData.deviceSerial"
+              v-model="setHeartbeatPeriodData.heartbeatPeriod"
               required
-              placeholder="SensorTag's serial number">
+              placeholder="Min = 2 min., Max = 2880">
             </b-form-input>
         </div>                  
     </b-modal>
@@ -94,23 +94,17 @@
             </b-form-input>
         </div>                  
     </b-modal> 
-    <b-modal id="modal-tag-interval-setting"
+    <b-modal id="modal-tag-add-setting"
         hide-header 
-        @ok="setIntervalsConfirm(setIntervalsData)"
+        @ok="addSensortagConfirm(setNewTagData)"
         >
         <div>
-          <h5>{{(setIntervalsData.device !== null) ? setIntervalsData.device.deviceId : ''}}'s read / report intervals</h5>
+          <h5>{{(setNewTagData.device !== null) ? setNewTagData.device.deviceId : ''}} adds new SensorTag</h5>
             <b-form-input class="at-border"
               type="number" 
-              v-model="setIntervalsData.readInterval"
+              v-model="setNewTagData.newTagName"
               required
-              placeholder="Sensor read interval (times of 15 seconds)..">
-            </b-form-input>
-            <b-form-input class="mt-2"
-                type="number" 
-                v-model="setIntervalsData.reportInterval"
-                required
-                placeholder="Tag report interval (times of read interval)..">
+              placeholder="SensorTag Serial Number">
             </b-form-input>
         </div>                  
     </b-modal>
@@ -137,6 +131,9 @@
                   IMEI
                 </b-col>
                 <b-col>
+                  UMD Name
+                </b-col>
+                <b-col lg="3">
                   SensorTags
                 </b-col>
                 <b-col lg="1"> 
@@ -158,12 +155,18 @@
                   {{('IMEI' in device) ? device.IMEI : ''}}
                 </b-col>
                 <b-col>
+                  {{('umdName' in device) ? device.umdName : ''}}
+                </b-col>
+                <b-col lg="3">
                   <b-row v-if="'sensortags' in device && device.sensortags.length > 0" class="mt-2">
                     <b-col>
                       <b-list-group-item v-for="(sensortagNo, index) in device.sensortags" :key="index" header = " ">
                         <b-row>
                           <b-col>
                             {{sensortagNo}} 
+                          </b-col>
+                          <b-col lg="4">
+                            <b-button @click="removeSensortag(device, sensortagNo)"><b-icon icon="trash-fill"></b-icon></b-button>
                           </b-col>
                         </b-row>
                       </b-list-group-item>
@@ -177,7 +180,7 @@
                   <b-dropdown right variant="secondary">
                     <b-dropdown-item @click.stop="setHeartbeatPeriod(device)">Heartbeat Period</b-dropdown-item>
                     <b-dropdown-item @click.stop="addSensortag(device)">Add new SensorTag</b-dropdown-item>
-                    <b-dropdown-item @click.stop="removeSensortag(device)">Remove a SensorTag</b-dropdown-item>
+                    <!-- <b-dropdown-item @click.stop="removeSensortag(device)">Remove a SensorTag</b-dropdown-item> -->
                     </b-dropdown>
               </b-col>
             </b-row>
@@ -235,14 +238,13 @@ export default {
       devices: [],
       searchString: '',
       isLoading: false,
-      setIntervalsData: {
+      setNewTagData: {
         device: null,
-        readInterval: null,
-        reportInterval: null
+        newTagName: null
       },
-      setDeviceSerialData: {
+      setHeartbeatPeriodData: {
         device: null,
-        deviceSerial: null
+        heartbeatPeriod: null
       },
       setBlePasskeyData: {
         device: null,
@@ -264,6 +266,44 @@ export default {
   computed: {
   },
   methods: {
+    setHeartbeatPeriod(device) {
+      this.setHeartbeatPeriodData.device = device
+      this.$bvModal.show('modal-set-heartbeat-period')
+    },
+    setHeartbeatPeriodConfirm(setHeartbeatPeriodData) {
+      /*
+      if (  (typeof setHeartbeatPeriodData.heartbeatPeriod === 'number' &&
+            setHeartbeatPeriodData.heartbeatPeriod >= 2) === false        ) {
+              console.log('invalid period: ', setHeartbeatPeriodData.heartbeatPeriod)
+              return
+      }
+      */
+      this.isLoading = true
+      let apiUrl = `https://goldfish-inbound-app.azurewebsites.net/api/goldfish_command?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`
+      fetch(apiUrl,  {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json;charset=UTF-8",
+          // "x-functions-key": "JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==" 
+        },
+        body: JSON.stringify({
+          module: 'gateway',
+          command: 'heartbeat',
+          device: setHeartbeatPeriodData.device.deviceId,          
+          period: setHeartbeatPeriodData.heartbeatPeriod
+        })
+      })
+      .then(response => response.json())
+      .then(jsonData => {
+        console.log('json data: ', jsonData)
+        this.loadDevices()
+        this.isLoading = false
+        this.$forceUpdate()
+      }).catch((error) => {
+        console.log('error: ', error)
+        this.isLoading = false
+      })
+    },
     hideCommandLogs(device) {
       delete device['commandLogs']  
       this.$forceUpdate()
@@ -288,29 +328,54 @@ export default {
         this.isLoading = false
       })
     },
-    createNewTag(){
-      if ((this.newTagName !== '' && this.newTagAddress !== '') == false) {
+    addSensortag(device) {
+      this.setNewTagData.device = device 
+      this.$bvModal.show('modal-tag-add-setting')
+    },
+    addSensortagConfirm(setNewTagData){
+      if (setNewTagData.newTagName === '') {
         return
       }
-      let tagAddress = this.newTagAddress
-      if (this.newTagAddress.indexOf(':') > -1) {
-        tagAddress = '0x' + this.newTagAddress.replace(/:/g, '')
-      }
       this.isLoading = true
-      let apiUrl = 'https://calamp-inbound-app.azurewebsites.net/api/cooltrax_ui'
+      let apiUrl = `https://goldfish-inbound-app.azurewebsites.net/api/goldfish_command?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`
       fetch(apiUrl,  {
         method: "POST",
         headers: {
           "Content-type": "application/json;charset=UTF-8",
-          "x-functions-key": "JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==" 
+          // "x-functions-key": "JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==" 
         },
         body: JSON.stringify({
-          command: 'create_tag',
-          tag: {
-            groupId: 'ela',
-            deviceId: this.newTagName, 
-            bdAddr: tagAddress
-          }
+          module: 'sensortag',
+          command: 'add',
+          device: setNewTagData.device.deviceId,          
+          sensortag: setNewTagData.newTagName
+        })
+      })
+      .then(response => response.json())
+      .then(jsonData => {
+        console.log(jsonData)
+        this.loadDevices()
+        this.isLoading = false
+        this.$forceUpdate()
+      }).catch((error) => {
+        console.log(error)
+        this.isLoading = false
+      })
+    },
+    removeSensortag(device, tagName) {
+      this.isLoading = true
+      let apiUrl = `https://goldfish-inbound-app.azurewebsites.net/api/goldfish_command?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`
+      fetch(apiUrl,  {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json;charset=UTF-8",
+          // "x-functions-key": "JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==" 
+        },
+        body: JSON.stringify({
+          module: 'sensortag',
+          command: 'remove',
+          device: device.deviceId,          
+          sensortag: tagName
         })
       })
       .then(response => response.json())
@@ -380,13 +445,13 @@ export default {
     },
     loadDevices() {
       this.isLoading = true
-      // let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/cooltrax_ui?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==&command=list_devices&search=${this.searchString}`
-
+     
       let withSearchString = ''
       if (this.searchString !== null || this.searchString !=='') {
         withSearchString = '/' + this.searchString
       }
-      let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/list_devices/gfishgway${withSearchString}?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==`
+      // let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/list_devices/gfishgway${withSearchString}?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==`
+      let apiUrl = `https://goldfish-inbound-app.azurewebsites.net/api/list_devices/gfishgway${withSearchString}?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`
       fetch(apiUrl,  {
         method: "GET",
         headers: {"Content-type": "application/json;charset=UTF-8"}
