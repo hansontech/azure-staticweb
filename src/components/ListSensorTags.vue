@@ -137,6 +137,9 @@
                   Gateway connected
                 </b-col>
                 <b-col>
+                  Last seen
+                </b-col>
+                <b-col>
                   Logging enable
                 </b-col>
                 <b-col>
@@ -144,7 +147,7 @@
                 </b-col>
                 <b-col lg="1"> 
                 </b-col>
-                <b-col lg="2" align="end">
+                <b-col lg="1" align="end">
                 </b-col>
         </b-row>
         </b>
@@ -159,6 +162,9 @@
                 <b-col>
                   {{('gateway' in device) ? device.gateway.deviceId : 'unknown'}}
                 </b-col>
+                <b-col><small>
+                  {{('lastSeen' in device) ? (new Date(device.lastSeen)).toISOString() : ''}}
+                </small></b-col>
                 <b-col>
                   {{('dataLog' in device) ? device.dataLog : 'unknown'}}
                 </b-col>
@@ -168,7 +174,7 @@
                 <b-col lg="1" v-b-popover.hover.bottom="'command logs'">
                   <b-button variant="info" @click="loadCommandLogs(device)">Logs</b-button>
                 </b-col>
-                <b-col lg="2" align="end">
+                <b-col lg="1" align="end">
                   <b-dropdown right variant="secondary">
                     <b-dropdown-item @click.stop="setIntervals(device)">Logging intervals</b-dropdown-item>
                     <b-dropdown-item @click.stop="enableDisableLog(device, 'enable')">Enable logging</b-dropdown-item>
