@@ -3,10 +3,10 @@
   <App/>
   <b-container fluid style="padding-right: 30px; padding-left: 30px; margin-top:75px; margin-left:0px; margin-right:0px"> 
     <b-row class="mt-5" align-v="center">
-      <b-col align="start" sm="4">
+        <b-col align="start" sm="3">
           <h4>CalAmp Devices <small>({{(devices !== null) ? devices.length : 0}})</small></h4>
         </b-col>
-        <b-col sm="4">
+        <b-col sm="3">
           <b-form-input class="at-border"
             type="text" 
             v-model="searchString"
@@ -20,12 +20,41 @@
         <b-col align="end">
           <b-button variant="info" v-b-popover.hover.bottom="'Sync with CalAmp devices in Cooltrax account'" @click="calampSync()">CalAmp Sync</b-button>
         </b-col>
+        <b-col>
+          <b-button id="buttonUpload" class="ml-1" variant="info" v-b-popover.hover.bottom="'Upload CalAmp devices in CSV file'" v-b-toggle.collapseUploadDevices>Upload Devices</b-button>
+        </b-col>
     </b-row>
     <b-row class="mt-2" style="border-bottom: 1px solid green;">
     </b-row>
     <b-row class = "mt-2" v-if="isLoading" align-v="center" align-h="center" > 
         <b-spinner/>
     </b-row>
+    <b-collapse id="collapseUploadDevices" class="mt-2">
+        <b-row align-v="center">
+          <b-col sm="4" />
+          <b-col sm="5">
+              <b-form-file
+                v-model="tagFile"
+                :state="Boolean(tagFile)"
+                placeholder="devices in csv ..."
+                drop-placeholder="Drop file here..."
+              ></b-form-file>
+          </b-col>
+          <b-col>
+            <b-button variant="success" class="ml-1" v-b-toggle.collapseUploadDevices @click="uploadCalampCsvFile(tagFile)">Confirm</b-button>
+          </b-col>
+        </b-row>
+    </b-collapse>
+    <b-collapse id="collapseDownloadFile" class="mt-2">
+        <b-row align-v="center">
+          <b-col>
+            <a download="CalAmp-devices.csv" id="downloadlink" style="display: none">Download CSV file</a>
+          </b-col>
+          <b-col>
+            <b-button v-b-toggle.collapseDownloadFile>Close</b-button>
+          </b-col>
+        </b-row>
+    </b-collapse>
     <b-row class="mt-2" >
       <b-col class="at-scroll">
         <!-- <b-card-group deck> -->
@@ -205,6 +234,8 @@ export default {
       searchString: '',
       isLoading: false,
       actionCommands: [],
+      textFile: null,
+      tagFile: null,
       readTagSettingDevice: null,
       readTagSettingSensorName: '',
       readTagSettingSensorOptions: [
@@ -221,6 +252,20 @@ export default {
   computed: {
   },
   methods: {
+    makeTextFile (text) {
+      var data = new Blob([text], {type: 'text/plain'});
+
+      // If we are replacing a previously generated file we need to
+      // manually revoke the object URL to avoid memory leaks.
+      if (this.textFile !== null) {
+        window.URL.revokeObjectURL(this.textFile);
+      }
+
+      this.textFile = window.URL.createObjectURL(data);
+
+      // returns a URL you can use as a href
+      return this.textFile;
+    },
     showActionStatus(action, device) {
       if (('commands' in device) === false) {
         return
@@ -237,6 +282,39 @@ export default {
     },
     resetTags() {
 
+    },
+    uploadCalampCsvFile(tagFile) {
+      console.log('upload')
+      this.isLoading = true
+      let reader = new window.FileReader() // if window is not used it says File READER is not defined
+      let that = this
+      reader.onload = async function (event) {
+        let content = event.target.result
+        // console.log('content: ', btoa(content))
+        let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/cooltrax_ui`
+        const rawResponse = await fetch(apiUrl,  {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json;charset=UTF-8",
+            "x-functions-key": "JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==" 
+          },
+          body: JSON.stringify({
+              command: 'upload_calamp_devices',
+              fileData: btoa(content)
+          })
+        })
+        const jsonData = await rawResponse.json()
+        // console.log(jsonData)
+
+        var link = document.getElementById('downloadlink')
+        link.href = that.makeTextFile(jsonData['csv'])
+        link.style.display = 'block'
+        that.$root.$emit('bv::toggle::collapse', 'collapseDownloadFile')
+        that.loadDevices()
+        that.isLoading = false
+        that.$forceUpdate()
+      }
+      reader.readAsText(tagFile)
     },
     sensorTagSettingReadings(device) {
       let sensorsWithReadings = device.sensors.filter(sensor => {

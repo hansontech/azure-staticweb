@@ -437,18 +437,20 @@ export default {
       if ('gateway' in device === false) {
         return
       }
-      this.isLoading = true     
-      this.goldfishApiData['body'] = JSON.stringify({
+      this.isLoading = true
+      let jsonInputs = {
           module: 'sensortag',
           command: 'dataLog',
           action: 'clear',
           device: device.gateway.deviceId,          
           sensortag: device.deviceId
-      })
+      }
+      this.goldfishApiData['body'] = JSON.stringify(jsonInputs)
       fetch(this.goldfishApiUrl,
          this.goldfishApiData)
       .then(response => response.json())
       .then(jsonData => {
+        console.log(jsonInputs)
         console.log(jsonData)
         this.isLoading = false
       }).catch((error) => {
