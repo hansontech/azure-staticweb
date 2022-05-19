@@ -396,7 +396,12 @@ export default {
       })
       .then(response => response.json())
       .then(jsonData => {
-        console.log(jsonData)
+        // console.log(jsonData)
+        var link = document.getElementById('downloadlink')
+        link.href = this.makeTextFile(jsonData['csv'])
+        link.style.display = 'block'
+        this.$root.$emit('bv::toggle::collapse', 'collapseDownloadFile')
+        this.isLoading = false
         this.loadDevices()
       }).catch((error) => {
         console.log(error)

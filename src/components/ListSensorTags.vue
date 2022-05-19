@@ -114,6 +114,20 @@
             </b-form-input>
         </div>                  
     </b-modal>
+    <b-modal id="modal-tag-sensor-wait-time-setting"
+        hide-header 
+        @ok="setSensorWaitTimeConfirm(setSensorWaitTimeData)"
+        >
+        <div>
+          <h5>{{(setSensorWaitTimeData.device !== null) ? setSensorWaitTimeData.device.deviceId : ''}}'s sensor wait time</h5>
+            <b-form-input class="at-border"
+              type="number" 
+              v-model="setSensorWaitTimeData.sensorWaitTime"
+              required
+              placeholder="Sensor wait time in ms, > 57ms">
+            </b-form-input>
+        </div>                  
+    </b-modal>
     <b-row class="mt-2" >
       <b-col class="at-scroll">
         <b-list-group>
@@ -184,6 +198,7 @@
                     <b-dropdown-item @click.stop="factoryReset(device)">Factory reset</b-dropdown-item>
                     <b-dropdown-item @click.stop="enterShippingMode(device)">Enter shipping mode</b-dropdown-item>
                     <b-dropdown-item @click.stop="exitLongRangeMode(device)">Exit from Long Range</b-dropdown-item>
+                    <b-dropdown-item @click.stop="setSensorWaitTime(device)">Set sensor wait time</b-dropdown-item>
                     <b-dropdown-divider/>
                     <b-dropdown-item @click.stop="setDeviceSerial(device)">New serial number</b-dropdown-item>
                     <b-dropdown-item @click.stop="setBlePasskey(device)">New passkey</b-dropdown-item>
@@ -246,6 +261,10 @@ export default {
         readInterval: null,
         reportInterval: null
       },
+      setSensorWaitTimeData: {
+        device: null,
+        waitTime: null
+      },
       setDeviceSerialData: {
         device: null,
         deviceSerial: null
@@ -288,6 +307,45 @@ export default {
       .then(jsonData => {
         console.log(jsonData)
         device.commandLogs = jsonData.commandLogs
+        this.isLoading = false
+      }).catch((error) => {
+        console.log(error)
+        this.isLoading = false
+      })
+    },
+    setSensorWaitTime(device) {
+      if ('gateway' in device === false) {
+        // need a gateway to send the command
+        return
+      }
+      this.setSensorWaitTimeData.device = device
+      if ('sensorWaitTime' in device) {
+        this.setSensorWaitTimeData.waitTime = device.sensorWaitTime
+      } 
+      this.$bvModal.show('modal-tag-sensor-wait-time-setting')
+    },
+    setSensorWaitTimeConfirm(setSensorWaitTimeData) {
+      if (setSensorWaitTimeData.sensorWaitTime === null) {
+        return
+      }      
+      this.isLoading = true
+      this.goldfishApiData['body'] = JSON.stringify({
+          module: 'sensortag',
+          command: 'sensorWaitTime',
+          action: 'set',
+          device: setSensorWaitTimeData.device.gateway.deviceId,          
+          sensortag: setSensorWaitTimeData.device.deviceId,
+          sensorWaitTime: setSensorWaitTimeData.sensorWaitTime
+      })
+
+      fetch(this.goldfishApiUrl,
+         this.goldfishApiData)
+      .then(response => response.json())
+      .then(jsonData => {
+        console.log(jsonData)
+        if ('error' in jsonData) {
+          console.log('request error: ', jsonData['error'])
+        }
         this.isLoading = false
       }).catch((error) => {
         console.log(error)
@@ -646,7 +704,6 @@ export default {
       if (this.searchString !== null || this.searchString !=='') {
         withSearchString = '/' + this.searchString
       }
-      // let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/list_devices/gfishstag${withSearchString}?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==`
       let apiUrl = `https://goldfish-inbound-app.azurewebsites.net/api/list_devices/gfishstag${withSearchString}?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`
       fetch(apiUrl,  {
         method: "GET",

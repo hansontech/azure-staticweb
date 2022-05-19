@@ -249,16 +249,7 @@ export default {
       setBlePasskeyData: {
         device: null,
         blePasskey: null
-      },
-      goldfishApiUrl: `https://goldfish-inbound-app.azurewebsites.net/api/goldfish_command?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`,
-      goldfishApiData: {
-        method: "POST",
-        headers: {
-          "Content-type": "application/json;charset=UTF-8",
-          // "x-functions-key": "ysA2sxn4pQV9FKlC3pteLuwrjmCPyFALlAakC96XKGEHSg5BcqP25A==" 
-        },
-        body: {}
-      },
+      }
     }
   },
   watch: {
@@ -450,7 +441,6 @@ export default {
       if (this.searchString !== null || this.searchString !=='') {
         withSearchString = '/' + this.searchString
       }
-      // let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/list_devices/gfishgway${withSearchString}?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==`
       let apiUrl = `https://goldfish-inbound-app.azurewebsites.net/api/list_devices/gfishgway${withSearchString}?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`
       fetch(apiUrl,  {
         method: "GET",
