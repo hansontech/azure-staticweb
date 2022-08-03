@@ -19,23 +19,49 @@
           <b-button variant="info" class="ml-1"  @click="refresh()">Refresh</b-button>
           <!-- <b-button id="buttonUpload" class="ml-1" variant="info" v-b-toggle.collapseUploadTags>Upload</b-button> -->
         </b-col>
+         <b-col>
+          <b-button id="buttonUpload" class="ml-1" variant="info" v-b-popover.hover.bottom="'Register Goldfish devices in CSV file'" v-b-toggle.collapseUploadDevices>Register Devices</b-button>
+        </b-col>
     </b-row>
     <b-tooltip target="buttonUpload" custom-class="custom-tooltip">
       <p style="text-align:left">
-        Upload CSV File with format of:<br/>
-        {ELA Tag Name},{Bluetooth Address}<br/>
-        For example, <br/>
-        <tt>
-        PTX51234,0x112233445566 <br/>
-        PTX51235,0x112233778899
-        </tt>
-        </p>
+        Upload CSV File with the format of:<br/>
+        Serial, IMEI<br/>
+        {DMT Device Serial No}, {Device's IMEI}<br/>
+        .......
+      </p>
     </b-tooltip>
     <b-row class="mt-2" style="border-bottom: 1px solid green;">
     </b-row>
     <b-row class = "mt-2" v-if="isLoading" align-v="center" align-h="center" > 
         <b-spinner/>
     </b-row>
+       <b-collapse id="collapseUploadDevices" class="mt-2">
+        <b-row align-v="center">
+          <b-col sm="4" />
+          <b-col sm="5">
+              <b-form-file
+                v-model="deviceFile"
+                :state="Boolean(deviceFile)"
+                placeholder="devices in csv ..."
+                drop-placeholder="Drop file here..."
+              ></b-form-file>
+          </b-col>
+          <b-col>
+            <b-button variant="success" class="ml-1" v-b-toggle.collapseUploadDevices @click="uploadGoldfishCsvFile(deviceFile)">Confirm</b-button>
+          </b-col>
+        </b-row>
+    </b-collapse>
+    <b-collapse id="collapseDownloadFile" class="mt-2">
+        <b-row align-v="center">
+          <b-col>
+            <a download="goldfish-devices.csv" id="downloadlink" style="display: none">Download CSV file</a>
+          </b-col>
+          <b-col>
+            <b-button v-b-toggle.collapseDownloadFile>Close</b-button>
+          </b-col>
+        </b-row>
+    </b-collapse>
     <b-collapse id="collapseUploadTags" class="mt-2">
         <b-row align-v="center">
           <b-col sm="4" />
@@ -179,7 +205,8 @@
                 <b-col lg="2" align="end">
                   <b-dropdown right variant="secondary">
                     <b-dropdown-item @click.stop="setHeartbeatPeriod(device)">Heartbeat Period</b-dropdown-item>
-                    <b-dropdown-item @click.stop="addSensortag(device)">Add new SensorTag</b-dropdown-item>
+                    <b-dropdown-item @click.stop="addSensortag(device)">Add a SensorTag</b-dropdown-item>
+                    <b-dropdown-item @click.stop="createSensortag(device)">Create new SensorTag</b-dropdown-item>
                     <!-- <b-dropdown-item @click.stop="removeSensortag(device)">Remove a SensorTag</b-dropdown-item> -->
                     </b-dropdown>
               </b-col>
@@ -234,6 +261,7 @@ export default {
     return {
       newTagName: '',
       newTagAddress: '',
+      deviceFile: null,
       tagFile: null,
       devices: [],
       searchString: '',
@@ -319,6 +347,33 @@ export default {
         this.isLoading = false
       })
     },
+    createSensortag(device){
+      this.setNewTagData.device = device
+      this.isLoading = true
+      let apiUrl = `https://goldfish-inbound-app.azurewebsites.net/api/goldfish_command?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`
+      fetch(apiUrl,  {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json;charset=UTF-8",
+          // "x-functions-key": "JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==" 
+        },
+        body: JSON.stringify({
+          module: 'sensortag',
+          command: 'create',
+          device: this.setNewTagData.device.deviceId
+        })
+      })
+      .then(response => response.json())
+      .then(jsonData => {
+        console.log(jsonData)
+        this.loadDevices()
+        this.isLoading = false
+        this.$forceUpdate()
+      }).catch((error) => {
+        console.log(error)
+        this.isLoading = false
+      })
+    },
     addSensortag(device) {
       this.setNewTagData.device = device 
       this.$bvModal.show('modal-tag-add-setting')
@@ -345,6 +400,10 @@ export default {
       .then(response => response.json())
       .then(jsonData => {
         console.log(jsonData)
+        if ('error' in jsonData) {
+          // TODO show it to UI
+          console.log('API call error:', jsonData.error )
+        }
         this.loadDevices()
         this.isLoading = false
         this.$forceUpdate()
@@ -460,6 +519,55 @@ export default {
         console.log(error)
         this.isLoading = false
       });
+    },
+    makeTextFile (text) {
+      var data = new Blob([text], {type: 'text/plain'});
+
+      // If we are replacing a previously generated file we need to
+      // manually revoke the object URL to avoid memory leaks.
+      if (this.textFile !== null) {
+        window.URL.revokeObjectURL(this.textFile);
+      }
+
+      this.textFile = window.URL.createObjectURL(data);
+
+      // returns a URL you can use as a href
+      return this.textFile;
+    },
+    uploadGoldfishCsvFile(deviceFile) {
+      console.log('upload')
+      this.isLoading = true
+      let reader = new window.FileReader() // if window is not used it says File READER is not defined
+      let that = this
+      reader.onload = async function (event) {
+        let content = event.target.result
+        console.log('content: ', btoa(content))
+        let apiUrl = `https://goldfish-inbound-app.azurewebsites.net/api/cooltrax_ui?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`
+        const rawResponse = await fetch(apiUrl,  {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json;charset=UTF-8",
+            "x-functions-key": "JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==" 
+          },
+          body: JSON.stringify({
+              command: 'register_goldfish_devices',
+              fileData: btoa(content)
+          })
+        })
+
+        console.log(rawResponse)
+        const jsonData = await rawResponse.json()
+        console.log(jsonData)
+
+        var link = document.getElementById('downloadlink')
+        link.href = that.makeTextFile(jsonData['csv'])
+        link.style.display = 'block'
+        that.$root.$emit('bv::toggle::collapse', 'collapseDownloadFile')
+        that.loadDevices()
+        that.isLoading = false
+        that.$forceUpdate()
+      }
+      reader.readAsText(deviceFile)
     }
   },
   created () {
