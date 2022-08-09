@@ -19,7 +19,10 @@
           <b-button variant="info" class="ml-1"  @click="refresh()">Refresh</b-button>
           <!-- <b-button id="buttonUpload" class="ml-1" variant="info" v-b-toggle.collapseUploadTags>Upload</b-button> -->
         </b-col>
-         <b-col>
+        <b-col>
+          <b-button id="buttonCreate" class="ml-1" variant="info" v-b-popover.hover.bottom="'Create a device'" v-b-toggle.collapseCreateDevice>Create</b-button>
+        </b-col>
+        <b-col>
           <b-button id="buttonUpload" class="ml-1" variant="info" v-b-popover.hover.bottom="'Register Goldfish devices in CSV file'" v-b-toggle.collapseUploadDevices>Register Devices</b-button>
         </b-col>
     </b-row>
@@ -36,6 +39,32 @@
     <b-row class = "mt-2" v-if="isLoading" align-v="center" align-h="center" > 
         <b-spinner/>
     </b-row>
+       <b-collapse id="collapseCreateDevice" class="mt-2">
+        <b-row class="mt-2" align-v="center">
+          <b-col sm="5">
+            <h5>Create a device </h5>
+            <b-form-input class="at-border"
+              type="text" 
+              v-model="setNewDeviceData.deviceId"
+              required
+              placeholder="Device ID">
+            </b-form-input>
+          </b-col>
+        </b-row>
+        <b-row class="mt-2" align-v="center">
+          <b-col sm="5">
+            <b-form-input class="at-border"
+              type="text" 
+              v-model="setNewDeviceData.IMEI"
+              required
+              placeholder="Device IMEI">
+            </b-form-input>
+          </b-col>
+          <b-col>
+            <b-button variant="success" class="ml-1" v-b-toggle.collapseCreateDevice @click="createDevice(setNewDeviceData)">Confirm</b-button>
+          </b-col>
+        </b-row>
+      </b-collapse>
        <b-collapse id="collapseUploadDevices" class="mt-2">
         <b-row align-v="center">
           <b-col sm="4" />
@@ -206,9 +235,9 @@
                   <b-dropdown right variant="secondary">
                     <b-dropdown-item @click.stop="setHeartbeatPeriod(device)">Heartbeat Period</b-dropdown-item>
                     <b-dropdown-item @click.stop="addSensortag(device)">Add a SensorTag</b-dropdown-item>
-                    <b-dropdown-item @click.stop="createSensortag(device)">Create new SensorTag</b-dropdown-item>
+                    <!-- <b-dropdown-item @click.stop="createSensortag(device)">Create new SensorTag</b-dropdown-item> -->
                     <!-- <b-dropdown-item @click.stop="removeSensortag(device)">Remove a SensorTag</b-dropdown-item> -->
-                    </b-dropdown>
+                  </b-dropdown>
               </b-col>
             </b-row>
             <b-row v-if="'commandLogs' in device && device.commandLogs.length > 0" class="mt-2">
@@ -269,6 +298,10 @@ export default {
       setNewTagData: {
         device: null,
         newTagName: null
+      },
+      setNewDeviceData: {
+        deviceId: null,
+        IMEI: null
       },
       setHeartbeatPeriodData: {
         device: null,
@@ -347,8 +380,11 @@ export default {
         this.isLoading = false
       })
     },
-    createSensortag(device){
-      this.setNewTagData.device = device
+    createDevice(setNewDeviceData){
+      if (setNewDeviceData.deviceId === null || setNewDeviceData.deviceId === '') {
+        return
+      }
+      
       this.isLoading = true
       let apiUrl = `https://goldfish-inbound-app.azurewebsites.net/api/goldfish_command?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`
       fetch(apiUrl,  {
@@ -358,9 +394,10 @@ export default {
           // "x-functions-key": "JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==" 
         },
         body: JSON.stringify({
-          module: 'sensortag',
+          module: 'gateway',
           command: 'create',
-          device: this.setNewTagData.device.deviceId
+          device: setNewDeviceData.deviceId,
+          IMEI: setNewDeviceData.IMEI
         })
       })
       .then(response => response.json())
