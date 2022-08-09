@@ -233,8 +233,9 @@
                 </b-col>
                 <b-col lg="2" align="end">
                   <b-dropdown right variant="secondary">
-                    <b-dropdown-item @click.stop="setHeartbeatPeriod(device)">Heartbeat Period</b-dropdown-item>
+                    <b-dropdown-item @click.stop="setHeartbeatPeriod(device)">Set Heartbeat Period</b-dropdown-item>
                     <b-dropdown-item @click.stop="addSensortag(device)">Add a SensorTag</b-dropdown-item>
+                    <b-dropdown-item @click.stop="setGatewayShippingMode(device)">Set Shipping Mode</b-dropdown-item>
                     <!-- <b-dropdown-item @click.stop="createSensortag(device)">Create new SensorTag</b-dropdown-item> -->
                     <!-- <b-dropdown-item @click.stop="removeSensortag(device)">Remove a SensorTag</b-dropdown-item> -->
                   </b-dropdown>
@@ -356,6 +357,32 @@ export default {
         this.isLoading = false
       })
     },
+    setGatewayShippingMode(device) {
+      this.isLoading = true
+      let apiUrl = `https://goldfish-inbound-app.azurewebsites.net/api/goldfish_command?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`
+      fetch(apiUrl,  {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json;charset=UTF-8",
+          // "x-functions-key": "JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==" 
+        },
+        body: JSON.stringify({
+          module: 'gateway',
+          command: 'shippingmode',
+          device: device.deviceId
+        })
+      })
+      .then(response => response.json())
+      .then(jsonData => {
+        console.log('json data: ', jsonData)
+        this.loadDevices()
+        this.isLoading = false
+        this.$forceUpdate()
+      }).catch((error) => {
+        console.log('error: ', error)
+        this.isLoading = false
+      })
+    },
     hideCommandLogs(device) {
       delete device['commandLogs']  
       this.$forceUpdate()
@@ -384,7 +411,7 @@ export default {
       if (setNewDeviceData.deviceId === null || setNewDeviceData.deviceId === '') {
         return
       }
-      
+
       this.isLoading = true
       let apiUrl = `https://goldfish-inbound-app.azurewebsites.net/api/goldfish_command?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`
       fetch(apiUrl,  {
