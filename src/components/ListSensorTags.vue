@@ -4,7 +4,7 @@
   <b-container fluid style="padding-right: 30px; padding-left: 30px; margin-top:75px; margin-left:0px; margin-right:0px"> 
     <b-row class="mt-5" align-v="center">
       <b-col align="start" sm="4">
-          <h4>SensorTags <small>({{(devices !== null) ? devices.length : 0}})</small></h4>
+          <h4><small>ver{{koiVersion}}</small> SensorTags <small>({{(devices !== null) ? devices.length : 0}})</small></h4>
         </b-col>
         <b-col sm="4">
           <b-form-input class="at-border"
@@ -256,6 +256,7 @@ export default {
       devices: [],
       searchString: '',
       isLoading: false,
+      koiVersion: 0,
       setIntervalsData: {
         device: null,
         readInterval: null,
@@ -696,6 +697,20 @@ export default {
       })
       
     },
+    showVersion() {
+      let apiUrl = `https://goldfish-inbound-app.azurewebsites.net/api/version?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`
+      fetch(apiUrl,  {
+        method: "GET",
+        headers: {"Content-type": "application/json;charset=UTF-8"}
+      })
+      .then(response => response.json())
+      .then(jsonData => {
+        this.koiVersion = jsonData.version
+        this.$forceUpdate()
+      }).catch((error) => {
+        console.log(error)
+      });
+    },
     loadDevices() {
       this.isLoading = true
       // let apiUrl = `https://calamp-inbound-app.azurewebsites.net/api/cooltrax_ui?code=JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==&command=list_devices&search=${this.searchString}`
@@ -727,6 +742,7 @@ export default {
   },
   created () {
     console.log('created')
+    this.showVersion()
     this.loadDevices()
   }
 }

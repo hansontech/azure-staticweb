@@ -3,10 +3,10 @@
   <App/>
   <b-container fluid style="padding-right: 30px; padding-left: 30px; margin-top:75px; margin-left:0px; margin-right:0px"> 
     <b-row class="mt-5" align-v="center">
-      <b-col align="start" sm="4">
-          <h4>Goldfish Gateways <small>({{(devices !== null) ? devices.length : 0}})</small></h4>
+        <b-col align="start" sm="3">
+          <h4><small>ver{{koiVersion}}</small> Gateways <small>({{(devices !== null) ? devices.length : 0}})</small></h4>
         </b-col>
-        <b-col sm="4">
+        <b-col sm="3">
           <b-form-input class="at-border"
             type="text" 
             v-model="searchString"
@@ -296,6 +296,7 @@ export default {
       devices: [],
       searchString: '',
       isLoading: false,
+      koiVersion: 0,
       setNewTagData: {
         device: null,
         newTagName: null
@@ -557,9 +558,22 @@ export default {
       })
       
     },
+    showVersion() {
+      let apiUrl = `https://goldfish-inbound-app.azurewebsites.net/api/version?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`
+      fetch(apiUrl,  {
+        method: "GET",
+        headers: {"Content-type": "application/json;charset=UTF-8"}
+      })
+      .then(response => response.json())
+      .then(jsonData => {
+        this.koiVersion = jsonData.version
+        this.$forceUpdate()
+      }).catch((error) => {
+        console.log(error)
+      });
+    },
     loadDevices() {
       this.isLoading = true
-     
       let withSearchString = ''
       if (this.searchString !== null || this.searchString !=='') {
         withSearchString = '/' + this.searchString
@@ -636,6 +650,7 @@ export default {
   },
   created () {
     console.log('created')
+    this.showVersion()
     this.loadDevices()
   }
 }
