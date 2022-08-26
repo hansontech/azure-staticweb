@@ -193,6 +193,8 @@
                     <b-dropdown-item @click.stop="setIntervals(device)">Logging intervals</b-dropdown-item>
                     <b-dropdown-item @click.stop="enableDisableLog(device, 'enable')">Enable logging</b-dropdown-item>
                     <b-dropdown-item @click.stop="enableDisableLog(device, 'disable')">Disable logging</b-dropdown-item>
+                    <b-dropdown-item @click.stop="enableDisableAccelerometer(device, 'enable')">Enable Accelerometer</b-dropdown-item>
+                    <b-dropdown-item @click.stop="enableDisableAccelerometer(device, 'disable')">Disable Accelerometer</b-dropdown-item>
                     <b-dropdown-item @click.stop="clearAllLogs(device)">Clear all logs</b-dropdown-item>
                     <b-dropdown-item @click.stop="systemReset(device)">System reset</b-dropdown-item>
                     <b-dropdown-item @click.stop="factoryReset(device)">Factory reset</b-dropdown-item>
@@ -478,6 +480,30 @@ export default {
           module: 'sensortag',
           command: 'dataLog',
           action: toEnableDisable,  // 'enable' 'disable'
+          device: device.gateway.deviceId,          
+          sensortag: device.deviceId
+      })
+      fetch(this.goldfishApiUrl,
+         this.goldfishApiData)
+      .then(response => response.json())
+      .then(jsonData => {
+        console.log(jsonData)
+        this.isLoading = false
+      }).catch((error) => {
+        console.log(error)
+        this.isLoading = false
+      })
+    },
+    enableDisableAccelerometer(device, toEnableDisable) {
+      if ('gateway' in device === false) {
+        return
+      }
+      this.isLoading = true
+      this.goldfishApiData.body = JSON.stringify({
+          module: 'sensortag',
+          command: 'sensorsEnable',
+          sensors: 'enable',  // 'enable' 'disable'
+          accelerometer: toEnableDisable,
           device: device.gateway.deviceId,          
           sensortag: device.deviceId
       })
