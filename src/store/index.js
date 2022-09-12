@@ -6,6 +6,7 @@ import persist from 'vuex-localstorage'
 // Modules
 import auth from './auth.js'
 import devices from './devices.js'
+import koi from './koi.js'
 
 Vue.use(Vuex)
 /*
@@ -23,7 +24,8 @@ export const store = new Vuex.Store({
   })],
   modules: {
    auth,
-   devices
+   devices,
+   koi
   }
 })
 

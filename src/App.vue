@@ -34,6 +34,9 @@
             </template>
             <b-dropdown-item v-if="isAuthenticated" @click="getUserInfo">Profile</b-dropdown-item>
             <b-dropdown-item v-if="isAuthenticated === false" href="/.auth/login/aad?post_login_redirect_uri=/loggedin">Sign In</b-dropdown-item>
+            <b-dropdown-item @click="toggleEnvironment" v-b-popover.hover.bottom="'Switch Koi environment'" >
+                Koi Env: <b> {{ (($store.getters.koiEnvName === 'DEV')? 'DEV -> PROD': 'PROD -> DEV') }}</b>
+            </b-dropdown-item>
             <b-dropdown-item v-if="isAuthenticated" href="/.auth/logout?post_logout_redirect_uri=/loggedout">Sign Out</b-dropdown-item>
           </b-nav-item-dropdown>
         </b-navbar-nav>
@@ -58,7 +61,8 @@ export default {
   data() {
     return {
       value: "World",
-      userInfo: {}
+      userInfo: {},
+      envIsDev: false
     }
   },
   created () {
@@ -79,6 +83,10 @@ export default {
     async getUserInfo () {
       this.userInfo = await caHelper.getUserInfo()
       this.$bvModal.show('modal-userInfo')
+    },
+    toggleEnvironment() {
+      this.envIsDev = !(this.envIsDev)
+      this.$store.commit('toggleKoiEnv')
     }
   }
 };

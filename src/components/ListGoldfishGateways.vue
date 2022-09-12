@@ -3,8 +3,8 @@
   <App/>
   <b-container fluid style="padding-right: 30px; padding-left: 30px; margin-top:75px; margin-left:0px; margin-right:0px"> 
     <b-row class="mt-5" align-v="center">
-        <b-col align="start" sm="3">
-          <h4><small>ver{{koiVersion}}</small> Gateways <small>({{(devices !== null) ? devices.length : 0}})</small></h4>
+        <b-col align="start" sm="3" v-b-popover.hover.bottom="'Koi version and environment'">
+          <h4><small>{{$store.getters.koiEnvName}} {{koiVersion}}</small> Gateways <small>({{(devices !== null) ? devices.length : 0}})</small></h4>
         </b-col>
         <b-col sm="3">
           <b-form-input class="at-border"
@@ -188,6 +188,9 @@
                 <b-col>
                   UMD Name
                 </b-col>
+                <b-col>
+                  BLE Mode
+                </b-col>
                 <b-col lg="3">
                   SensorTags
                 </b-col>
@@ -211,6 +214,9 @@
                 </b-col>
                 <b-col>
                   {{('umdName' in device) ? device.umdName : ''}}
+                </b-col>
+                <b-col>
+                  {{('bleMode' in device.configuration) ? device.configuration.bleMode : 'unknown'}}
                 </b-col>
                 <b-col lg="3">
                   <b-row v-if="'sensortags' in device && device.sensortags.length > 0" class="mt-2">
@@ -236,6 +242,9 @@
                     <b-dropdown-item @click.stop="setHeartbeatPeriod(device)">Set Heartbeat Period</b-dropdown-item>
                     <b-dropdown-item @click.stop="addSensortag(device)">Add a SensorTag</b-dropdown-item>
                     <b-dropdown-item @click.stop="setGatewayShippingMode(device)">Set Shipping Mode</b-dropdown-item>
+                    <b-dropdown-item @click.stop="toggleGatewayBleMode(device)">
+                      BLE Mode to {{(device.configuration.bleMode === 'ElaTag') ? 'SensorTag' : 'ElaTag' }}
+                    </b-dropdown-item>
                     <!-- <b-dropdown-item @click.stop="createSensortag(device)">Create new SensorTag</b-dropdown-item> -->
                     <!-- <b-dropdown-item @click.stop="removeSensortag(device)">Remove a SensorTag</b-dropdown-item> -->
                   </b-dropdown>
@@ -312,14 +321,30 @@ export default {
       setBlePasskeyData: {
         device: null,
         blePasskey: null
-      }
+      },
+      // koiApiUrlBase: 'goldfish-inbound-app.azurewebsites.net',
+      // koiApiUrlBase: 'goldfish-app-koi-service-dev.azurewebsites.net',
+      // koiApiKey: 'CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ=='
+      // koiApiKey: 'FcfbmYVqZZwCFjPF5EJBtnNfdSPNkFMontUJ1kmH-Iy9AzFuOFHu-w=='
     }
   },
   watch: {
+    /*
+    bleModeIsSensorTag: {
+      handler: function (newBleModeIsSensorTag) {
+      },
+      deep: true
+    }
+    */
   },
   computed: {
   },
   methods: {
+    getKoiApi(commandAndQuery) {
+      let koiEnv = this.$store.getters.koiEnv
+      let url = `https://${koiEnv.koiApiUrlBase}/api/${commandAndQuery}?code=${koiEnv.koiApiKey}`
+      return url
+    },
     setHeartbeatPeriod(device) {
       this.setHeartbeatPeriodData.device = device
       this.$bvModal.show('modal-set-heartbeat-period')
@@ -333,12 +358,11 @@ export default {
       }
       */
       this.isLoading = true
-      let apiUrl = `https://goldfish-inbound-app.azurewebsites.net/api/goldfish_command?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`
+      let apiUrl = this.getKoiApi('goldfish_command')
       fetch(apiUrl,  {
         method: "POST",
         headers: {
-          "Content-type": "application/json;charset=UTF-8",
-          // "x-functions-key": "JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==" 
+          "Content-type": "application/json;charset=UTF-8"
         },
         body: JSON.stringify({
           module: 'gateway',
@@ -358,14 +382,45 @@ export default {
         this.isLoading = false
       })
     },
-    setGatewayShippingMode(device) {
+    toggleGatewayBleMode(device) {
+      let bleMode = 'SensorTag'
+      if (device.configuration.bleMode === 'SensorTag') {
+        bleMode = 'ElaTag'
+      }
       this.isLoading = true
-      let apiUrl = `https://goldfish-inbound-app.azurewebsites.net/api/goldfish_command?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`
+      let apiUrl = this.getKoiApi('goldfish_command')
       fetch(apiUrl,  {
         method: "POST",
         headers: {
-          "Content-type": "application/json;charset=UTF-8",
-          // "x-functions-key": "JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==" 
+          "Content-type": "application/json;charset=UTF-8" 
+        },
+        body: JSON.stringify({
+          module: 'gateway',
+          command: 'update',
+          configuration: {
+            bleMode: bleMode
+          },
+          device: device.deviceId
+        })
+      })
+      .then(response => response.json())
+      .then(jsonData => {
+        console.log('json data: ', jsonData)
+        this.loadDevices()
+        this.isLoading = false
+        this.$forceUpdate()
+      }).catch((error) => {
+        console.log('error: ', error)
+        this.isLoading = false
+      })
+    },
+    setGatewayShippingMode(device) {
+      this.isLoading = true
+      let apiUrl = this.getKoiApi('goldfish_command')
+      fetch(apiUrl,  {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json;charset=UTF-8" 
         },
         body: JSON.stringify({
           module: 'gateway',
@@ -391,12 +446,12 @@ export default {
     loadCommandLogs(device) {
       console.log('test command logs')
       this.isLoading = true
-      fetch( `https://goldfish-inbound-app.azurewebsites.net/api/list_gateway_command_logs/${device.deviceId}?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`,
+      fetch( this.getKoiApi(`list_gateway_command_logs/${device.deviceId}`),
       {
           method: "GET",
           headers: {
             "Content-type": "application/json;charset=UTF-8",
-          },
+          }
       })
       .then(response => response.json())
       .then(jsonData => {
@@ -414,12 +469,11 @@ export default {
       }
 
       this.isLoading = true
-      let apiUrl = `https://goldfish-inbound-app.azurewebsites.net/api/goldfish_command?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`
+      let apiUrl = this.getKoiApi('goldfish_command')
       fetch(apiUrl,  {
         method: "POST",
         headers: {
-          "Content-type": "application/json;charset=UTF-8",
-          // "x-functions-key": "JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==" 
+          "Content-type": "application/json;charset=UTF-8"
         },
         body: JSON.stringify({
           module: 'gateway',
@@ -448,12 +502,11 @@ export default {
         return
       }
       this.isLoading = true
-      let apiUrl = `https://goldfish-inbound-app.azurewebsites.net/api/goldfish_command?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`
+      let apiUrl = this.getKoiApi('goldfish_command')
       fetch(apiUrl,  {
         method: "POST",
         headers: {
-          "Content-type": "application/json;charset=UTF-8",
-          // "x-functions-key": "JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==" 
+          "Content-type": "application/json;charset=UTF-8"
         },
         body: JSON.stringify({
           module: 'sensortag',
@@ -479,12 +532,11 @@ export default {
     },
     removeSensortag(device, tagName) {
       this.isLoading = true
-      let apiUrl = `https://goldfish-inbound-app.azurewebsites.net/api/goldfish_command?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`
+      let apiUrl = this.getKoiApi('goldfish_command')
       fetch(apiUrl,  {
         method: "POST",
         headers: {
-          "Content-type": "application/json;charset=UTF-8",
-          // "x-functions-key": "JG3kCdiic674IbKBTKcybVYJRaW1an5Cz4ZrZWAIwzQAsarMne8uPg==" 
+          "Content-type": "application/json;charset=UTF-8"
         },
         body: JSON.stringify({
           module: 'sensortag',
@@ -559,7 +611,7 @@ export default {
       
     },
     showVersion() {
-      let apiUrl = `https://goldfish-inbound-app.azurewebsites.net/api/version?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`
+      let apiUrl = this.getKoiApi('version')
       fetch(apiUrl,  {
         method: "GET",
         headers: {"Content-type": "application/json;charset=UTF-8"}
@@ -578,7 +630,7 @@ export default {
       if (this.searchString !== null || this.searchString !=='') {
         withSearchString = '/' + this.searchString
       }
-      let apiUrl = `https://goldfish-inbound-app.azurewebsites.net/api/list_devices/gfishgway${withSearchString}?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`
+      let apiUrl = this.getKoiApi(`list_devices/gfishgway${withSearchString}`)
       fetch(apiUrl,  {
         method: "GET",
         headers: {"Content-type": "application/json;charset=UTF-8"}
@@ -620,7 +672,7 @@ export default {
       reader.onload = async function (event) {
         let content = event.target.result
         console.log('content: ', btoa(content))
-        let apiUrl = `https://goldfish-inbound-app.azurewebsites.net/api/cooltrax_ui?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`
+        let apiUrl = this.getKoiApi('cooltrax_ui')
         const rawResponse = await fetch(apiUrl,  {
           method: "POST",
           headers: {

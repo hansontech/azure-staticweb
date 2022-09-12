@@ -4,7 +4,7 @@
   <b-container fluid style="padding-right: 30px; padding-left: 30px; margin-top:75px; margin-left:0px; margin-right:0px"> 
     <b-row class="mt-5" align-v="center">
       <b-col align="start" sm="4">
-          <h4><small>ver{{koiVersion}}</small> SensorTags <small>({{(devices !== null) ? devices.length : 0}})</small></h4>
+          <h4><small>{{$store.getters.koiEnvName}} {{koiVersion}}</small> SensorTags <small>({{(devices !== null) ? devices.length : 0}})</small></h4>
         </b-col>
         <b-col sm="4">
           <b-form-input class="at-border"
@@ -276,7 +276,6 @@ export default {
         device: null,
         blePasskey: null
       },
-      goldfishApiUrl: `https://goldfish-inbound-app.azurewebsites.net/api/goldfish_command?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`,
       goldfishApiData: {
         method: "POST",
         headers: {
@@ -292,6 +291,11 @@ export default {
   computed: {
   },
   methods: {
+    getKoiApi(commandAndQuery) {
+      let koiEnv = this.$store.getters.koiEnv
+      let url = `https://${koiEnv.koiApiUrlBase}/api/${commandAndQuery}?code=${koiEnv.koiApiKey}`
+      return url
+    },
     hideCommandLogs(device) {
       delete device['commandLogs']  
       this.$forceUpdate()
@@ -299,7 +303,7 @@ export default {
     loadCommandLogs(device) {
       console.log('test command logs')
       this.isLoading = true
-      fetch( `https://goldfish-inbound-app.azurewebsites.net/api/list_sensortag_command_logs/${device.deviceId}?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`,
+      fetch( this.getKoiApi(`list_sensortag_command_logs/${device.deviceId}`),
       {
           method: "GET",
           headers: {
@@ -341,7 +345,7 @@ export default {
           sensorWaitTime: setSensorWaitTimeData.sensorWaitTime
       })
 
-      fetch(this.goldfishApiUrl,
+      fetch(this.getKoiApi('goldfish_command'),
          this.goldfishApiData)
       .then(response => response.json())
       .then(jsonData => {
@@ -389,7 +393,7 @@ export default {
           }
       })
 
-      fetch(this.goldfishApiUrl,
+      fetch(this.getKoiApi('goldfish_command'),
          this.goldfishApiData)
       .then(response => response.json())
       .then(jsonData => {
@@ -426,7 +430,7 @@ export default {
           serial: setDeviceSerialData.deviceSerial
       })
 
-      fetch(this.goldfishApiUrl,
+      fetch(this.getKoiApi('goldfish_command'),
          this.goldfishApiData)
       .then(response => response.json())
       .then(jsonData => {
@@ -460,7 +464,7 @@ export default {
           passkey: setBlePasskeyData.blePasskey
       })
 
-      fetch(this.goldfishApiUrl,
+      fetch(this.getKoiApi('goldfish_command'),
          this.goldfishApiData)
       .then(response => response.json())
       .then(jsonData => {
@@ -483,7 +487,7 @@ export default {
           device: device.gateway.deviceId,          
           sensortag: device.deviceId
       })
-      fetch(this.goldfishApiUrl,
+      fetch(this.getKoiApi('goldfish_command'),
          this.goldfishApiData)
       .then(response => response.json())
       .then(jsonData => {
@@ -507,7 +511,7 @@ export default {
           device: device.gateway.deviceId,          
           sensortag: device.deviceId
       })
-      fetch(this.goldfishApiUrl,
+      fetch(this.getKoiApi('goldfish_command'),
          this.goldfishApiData)
       .then(response => response.json())
       .then(jsonData => {
@@ -531,7 +535,7 @@ export default {
           sensortag: device.deviceId
       }
       this.goldfishApiData['body'] = JSON.stringify(jsonInputs)
-      fetch(this.goldfishApiUrl,
+      fetch(this.getKoiApi('goldfish_command'),
          this.goldfishApiData)
       .then(response => response.json())
       .then(jsonData => {
@@ -554,7 +558,7 @@ export default {
           device: device.gateway.deviceId,          
           sensortag: device.deviceId
       })
-      fetch(this.goldfishApiUrl,
+      fetch(this.getKoiApi('goldfish_command'),
          this.goldfishApiData)
       .then(response => response.json())
       .then(jsonData => {
@@ -576,7 +580,7 @@ export default {
           device: device.gateway.deviceId,          
           sensortag: device.deviceId
       })
-      fetch(this.goldfishApiUrl,
+      fetch(this.getKoiApi('goldfish_command'),
          this.goldfishApiData)
       .then(response => response.json())
       .then(jsonData => {
@@ -599,7 +603,7 @@ export default {
           device: device.gateway.deviceId,          
           sensortag: device.deviceId
       })
-      fetch(this.goldfishApiUrl,
+      fetch(this.getKoiApi('goldfish_command'),
          this.goldfishApiData)
       .then(response => response.json())
       .then(jsonData => {
@@ -622,7 +626,7 @@ export default {
           device: device.gateway.deviceId,          
           sensortag: device.deviceId
       })
-      fetch(this.goldfishApiUrl,
+      fetch(this.getKoiApi('goldfish_command'),
          this.goldfishApiData)
       .then(response => response.json())
       .then(jsonData => {
@@ -724,7 +728,7 @@ export default {
       
     },
     showVersion() {
-      let apiUrl = `https://goldfish-inbound-app.azurewebsites.net/api/version?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`
+      let apiUrl = this.getKoiApi('version')
       fetch(apiUrl,  {
         method: "GET",
         headers: {"Content-type": "application/json;charset=UTF-8"}
@@ -745,7 +749,7 @@ export default {
       if (this.searchString !== null || this.searchString !=='') {
         withSearchString = '/' + this.searchString
       }
-      let apiUrl = `https://goldfish-inbound-app.azurewebsites.net/api/list_devices/gfishstag${withSearchString}?code=CZw/SVXgMCUYFdaSaA1njSCN0F1a4GB5sS5Z4Nqxg6aiu3U5FNKrMQ==`
+      let apiUrl = this.getKoiApi(`list_devices/gfishstag${withSearchString}`)
       fetch(apiUrl,  {
         method: "GET",
         headers: {"Content-type": "application/json;charset=UTF-8"}
