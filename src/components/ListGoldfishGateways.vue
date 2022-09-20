@@ -216,7 +216,7 @@
                   {{('umdName' in device) ? device.umdName : ''}}
                 </b-col>
                 <b-col>
-                  {{('bleMode' in device.configuration) ? device.configuration.bleMode : 'unknown'}}
+                  {{('configuration' in device && 'bleMode' in device.configuration) ? device.configuration.bleMode : 'unknown'}}
                 </b-col>
                 <b-col lg="3">
                   <b-row v-if="'sensortags' in device && device.sensortags.length > 0" class="mt-2">
@@ -243,7 +243,7 @@
                     <b-dropdown-item @click.stop="addSensortag(device)">Add a SensorTag</b-dropdown-item>
                     <b-dropdown-item @click.stop="setGatewayShippingMode(device)">Set Shipping Mode</b-dropdown-item>
                     <b-dropdown-item @click.stop="toggleGatewayBleMode(device)">
-                      BLE Mode to {{(device.configuration.bleMode === 'ElaTag') ? 'SensorTag' : 'ElaTag' }}
+                      BLE Mode to {{('configuration' in device && 'bleMode' in device.configuration && device.configuration.bleMode === 'ElaTag') ? 'SensorTag' : 'ElaTag' }}
                     </b-dropdown-item>
                     <!-- <b-dropdown-item @click.stop="createSensortag(device)">Create new SensorTag</b-dropdown-item> -->
                     <!-- <b-dropdown-item @click.stop="removeSensortag(device)">Remove a SensorTag</b-dropdown-item> -->
@@ -384,7 +384,7 @@ export default {
     },
     toggleGatewayBleMode(device) {
       let bleMode = 'SensorTag'
-      if (device.configuration.bleMode === 'SensorTag') {
+      if ('configuration' in device && 'bleMode' in device.configuration && device.configuration.bleMode === 'SensorTag') {
         bleMode = 'ElaTag'
       }
       this.isLoading = true
