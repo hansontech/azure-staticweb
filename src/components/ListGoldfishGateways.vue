@@ -343,6 +343,7 @@ export default {
     getKoiApi(commandAndQuery) {
       let koiEnv = this.$store.getters.koiEnv
       let url = `https://${koiEnv.koiApiUrlBase}/api/${commandAndQuery}?code=${koiEnv.koiApiKey}`
+      console.log(url)
       return url
     },
     setHeartbeatPeriod(device) {
@@ -672,7 +673,7 @@ export default {
       reader.onload = async function (event) {
         let content = event.target.result
         console.log('content: ', btoa(content))
-        let apiUrl = this.getKoiApi('cooltrax_ui')
+        let apiUrl = that.getKoiApi('cooltrax_ui')
         const rawResponse = await fetch(apiUrl,  {
           method: "POST",
           headers: {
