@@ -245,6 +245,8 @@
                     <b-dropdown-item @click.stop="toggleGatewayBleMode(device)">
                       BLE Mode to {{('configuration' in device && 'bleMode' in device.configuration && device.configuration.bleMode === 'ElaTag') ? 'SensorTag' : 'ElaTag' }}
                     </b-dropdown-item>
+                    <b-dropdown-item @click.stop="deleteDevice(device)">Delete</b-dropdown-item>
+                    <b-dropdown-item @click.stop="getDeviceInfo(device)">Get</b-dropdown-item>
                     <!-- <b-dropdown-item @click.stop="createSensortag(device)">Create new SensorTag</b-dropdown-item> -->
                     <!-- <b-dropdown-item @click.stop="removeSensortag(device)">Remove a SensorTag</b-dropdown-item> -->
                   </b-dropdown>
@@ -486,6 +488,56 @@ export default {
       .then(response => response.json())
       .then(jsonData => {
         console.log(jsonData)
+        this.loadDevices()
+        this.isLoading = false
+        this.$forceUpdate()
+      }).catch((error) => {
+        console.log(error)
+        this.isLoading = false
+      })
+    },
+    deleteDevice(device){
+      this.isLoading = true
+      let apiUrl = this.getKoiApi('goldfish_command')
+      fetch(apiUrl,  {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json;charset=UTF-8"
+        },
+        body: JSON.stringify({
+          module: 'gateway',
+          command: 'delete',
+          device: device.deviceId
+        })
+      })
+      .then(response => response.json())
+      .then(jsonData => {
+        console.log(jsonData)
+        this.loadDevices()
+        this.isLoading = false
+        this.$forceUpdate()
+      }).catch((error) => {
+        console.log(error)
+        this.isLoading = false
+      })
+    },
+    getDeviceInfo(device){
+      this.isLoading = true
+      let apiUrl = this.getKoiApi('goldfish_command')
+      fetch(apiUrl,  {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json;charset=UTF-8"
+        },
+        body: JSON.stringify({
+          module: 'gateway',
+          command: 'get',
+          device: device.deviceId
+        })
+      })
+      .then(response => response.json())
+      .then(jsonData => {
+        console.log('device info: ', jsonData)
         this.loadDevices()
         this.isLoading = false
         this.$forceUpdate()
